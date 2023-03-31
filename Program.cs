@@ -24,7 +24,6 @@ namespace Demon
                 core.Saver();
 
                 Thread.Sleep(1000 * 600);
-
             }
         }
     }
