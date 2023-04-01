@@ -12,7 +12,7 @@ namespace Demon
 {
     public class Core
     {
-        public int ComputerID { get; set; } = 0;
+        public int ComputerID { get; set; }
 
         //Ukládá data - rozvrh, cesty odkud a kam pro jednotlivý config - nejspíš zbytečné
         //public Schedules Schedules { get; set; }
@@ -40,7 +40,6 @@ namespace Demon
 
         public async Task GetDataFromAPI()
         {
-
             //Načte configy
             string configsResult = await Client.GetStringAsync($"/api/Computers/{ComputerID}/Configs");
             List<Configs> configs = JsonConvert.DeserializeObject<List<Configs>>(configsResult);
@@ -115,10 +114,7 @@ namespace Demon
             foreach (Configs config in Configs)
             {
                 string snapshotsResult = await Client.GetStringAsync($"/api/Configs/{config.ID}/{ComputerID}/Snapshot");
-                string snapVersionResult = await Client.GetStringAsync($"/api/Configs/{ComputerID}/{config.ID}/SnapshotVersion");
-                List<Functions.Objects.Path> paths = JsonConvert.DeserializeObject<List<Functions.Objects.Path>>(snapshotsResult);
-
-                Snapshot snapshot = new Snapshot(config.ID) {Paths = paths, Version = Convert.ToInt32(snapVersionResult)};
+                Snapshot snapshot = JsonConvert.DeserializeObject<Snapshot>(snapshotsResult);
 
                 Snapshots.Add(snapshot);
             }

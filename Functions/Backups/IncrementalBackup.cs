@@ -19,16 +19,9 @@ namespace Demon.Functions.Backups
 
         public override void Copy(string source, string destination, Snapshot snapshot)
         {
-            //Pokud cesta existuje v snapshotu tak se metoda returne, jinak složku/soubor zkopíruje do destinace
-            foreach (var path in snapshot.Paths)
-            {
-                if (path.FullPath == source)
-                    return;
-            }
-
             base.Copy(source, destination, snapshot);
 
-            //Vždy přidá source ve formátu Json (jako string) do UpdatedSnapshot
+            //Vždy přidá source ve formátu Json (jako string) do UpdatedPaths
             Objects.Path snapshotJson = new Objects.Path()
             {
                 FileName = source.Substring(source.LastIndexOf('\\')),
@@ -36,7 +29,7 @@ namespace Demon.Functions.Backups
                 UpdateTime = DateTime.Now
             };
 
-            UpdatedSnapshot += JsonConvert.SerializeObject(snapshotJson);
+            UpdatedPaths += JsonConvert.SerializeObject(snapshotJson);
 
         }        
     }

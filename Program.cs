@@ -13,7 +13,7 @@ namespace Demon
             Core core = new Core(client);
             Authorization authorizePc = new Authorization();
 
-            authorizePc.Authorize(client);
+            await authorizePc.Authorize(client);
 
             core.ComputerID = authorizePc.ReturnId();
 

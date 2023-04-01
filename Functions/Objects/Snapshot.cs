@@ -10,21 +10,14 @@ namespace Demon.Functions.Objects
     {
         public int ConfigID { get; set; }
 
-        public int Version { get; set; } = 0;
+        public int Version { get; set; }
 
         public List<Path> Paths { get; set; }
 
-        //Konstruktor zavolá metodu která naplní snapshot daty 
-        public Snapshot(int configID)
-        {
-            ConfigID = configID;
-        }
-
-        ////naplní pathy jednotlivými cestami ze snapshotu, názvem souboru a posledním datumem změny
-        //public void FillData(string snaphsotString)
-        //{           
-        //    this.Paths.Add(JsonConvert.DeserializeObject<Path>(snaphsotString));           
-        //    Version++;
+        ////Konstruktor zavolá metodu která naplní snapshot daty 
+        //public Snapshot(int configID)
+        //{
+        //    ConfigID = configID;
         //}
 
         //každá složka v snapshotu uložena v téhle podobě:

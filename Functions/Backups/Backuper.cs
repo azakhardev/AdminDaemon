@@ -1,5 +1,6 @@
 ﻿using Demon.Functions.Objects;
 using Demon.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,18 +13,17 @@ namespace Demon.Functions.Backups
 {
     public abstract class Backuper
     {
-        //public Snapshot Snapshots { get; set; }
         public Core Core { get; set; }
 
         public HttpClient Client { get; set; }
 
         public string Algorithm { get; set; }
 
-        public string UpdatedSnapshot { get; set; } = "";
+        public string UpdatedPaths { get; set; } = "";
 
         public List<Configs> Configs { get; set; } = new List<Configs>();
 
-        public List<Snapshot> Snapshots { get; set; } = new List<Snapshot>();
+        public List<string> DestinationsCopied { get; set; } = new List<string>();
 
         public Backuper(Core core, string algorithm)
         {
@@ -31,22 +31,22 @@ namespace Demon.Functions.Backups
             Algorithm = algorithm;
             Client = Core.Client;
 
-            //projedeme všechny configy v core, přidá do this.Configs configy u kterých se shoduje algoritmus s this.Algorithm
+            //Projedeme všechny configy v core, přidá do this.Configs configy u kterých se shoduje algoritmus s this.Algorithm
             foreach (Configs config in Core.Configs)
             {
                 if (config.Algorithm == algorithm)
                     Configs.Add(config);
             }
 
-            //Projedeme všechny snapshoty v core, přidá do this.Snapshots snapshoty u kterých se shoduje typ algoritmu a configID s this.Configs
-            foreach (Snapshot snap in Core.Snapshots)
-            {
-                foreach (Configs config in this.Configs)
-                {
-                    if (snap.ConfigID == config.ID)
-                        Snapshots.Add(snap);
-                }
-            }
+            ////Projedeme všechny snapshoty v core, přidá do this.Snapshots snapshoty u kterých se shoduje typ algoritmu a configID s this.Configs
+            //foreach (Snapshot snap in Core.Snapshots)
+            //{
+            //    foreach (Configs config in this.Configs)
+            //    {
+            //        if (snap.ConfigID == config.ID)
+            //            Snapshots.Add(snap);
+            //    }
+            //}
         }
 
         //Core předá argumenty podle ID Configs/Schedules které se schodují s ID v daném backupru a pak proběhne zálohování dat podle typu zálohování
@@ -59,20 +59,25 @@ namespace Demon.Functions.Backups
             foreach (Sources source in sources)
             {
                 foreach (Destinations destination in destinations)
-                {                    
-                    Copy(source.SourcePath, destination.DestinationPath, Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault());
+                {
+                    Copy(source.SourcePath, destination.DestinationPath, Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault());
                 }
             }
 
-            //Putne (obnoví) UpdatedSnapshot na server pokud obsahuje nějaký char
-            if (UpdatedSnapshot != "")
-               await Client.PutAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}",UpdatedSnapshot);
-
+            //Obnoví v Core snapshot pro daný config
+            Snapshot updatedSnap = Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault();
+            if (UpdatedPaths != "")
+            {
+                updatedSnap.ConfigID = config.ID;
+                updatedSnap.Version++;
+                updatedSnap.Paths.Add(JsonConvert.DeserializeObject<Objects.Path>(UpdatedPaths));
+            }
+            //Putne (obnoví) updatedSnap na server po kažé záloze
+            await Client.PutAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}", updatedSnap);
         }
 
-        //**rozbité kopírování**
-        //metoda pro kopírování dat - zkopíruje soubor nebo prázdný soubor který získá z listu sources
-        //Odfiltrováno pomocí metody ReturnSourcesToCopy která vrací list cest které je potřeba zkopírovat
+        //Metoda pro kopírování dat - zkopíruje soubor nebo prázdný soubor který získá z listu sources
+        //Odfiltrováno pomocí metody ReturnSourcesToCopy která vrací list cest které nejsou ve snapshotu
         public virtual void Copy(string source, string destination, Snapshot snapshot)
         {
             DirectoryInfo sourceDirectory = new DirectoryInfo(source);
@@ -97,11 +102,13 @@ namespace Demon.Functions.Backups
         }
 
         //Maže složky z destinace které jsou staré (na podobě Queue - FiFo)
-        public void Deleter(Configs config, Snapshot snapshot) 
+        public void Deleter(Configs config, Snapshot snapshot, Destinations destination)
         {
-            if (snapshot.Version > config.MaxPackageAmount) 
+            if (snapshot.Version > config.MaxPackageAmount)
             {
-
+                DirectoryInfo destinationDirectory = new DirectoryInfo(DestinationsCopied.First());
+                destinationDirectory.Delete();
+                DestinationsCopied.RemoveAt(DestinationsCopied.IndexOf(DestinationsCopied.First()));
             }
         }
 

@@ -13,21 +13,19 @@ namespace Demon
     public class Authorization
     {
         private int ID { get; set; }
-        public void Authorize(HttpClient client)
+        public async Task Authorize(HttpClient client)
         {
             string idFile = (Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\computerID.txt").ToString();
-            DirectoryInfo dir = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
-
+            
             if (File.Exists(idFile))
             {
                 IdReader(idFile);
             }
             else
             {
-                UploadPC(client);
+                await UploadPC(client);
 
-                File.WriteAllText(idFile, ID.ToString());
-                
+                File.WriteAllText(idFile, ID.ToString());                
             }
         }
 
@@ -47,10 +45,11 @@ namespace Demon
             ID = Convert.ToInt32(computerID);
         }
 
+        
         public void IdReader(string idFile)
         {
             StreamReader sr = new StreamReader(idFile);
-            ID = sr.Read();
+            ID = Convert.ToInt32(sr.ReadLine());
             sr.Close();
         }
 
