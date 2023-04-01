@@ -114,10 +114,11 @@ namespace Demon
         {
             foreach (Configs config in Configs)
             {
-                string computersConfigsResult = await Client.GetStringAsync($"/api/Configs/{config.ID}/{ComputerID}/Snapshot");
-                List<Functions.Objects.Path> paths = JsonConvert.DeserializeObject<List<Functions.Objects.Path>>(computersConfigsResult);
+                string snapshotsResult = await Client.GetStringAsync($"/api/Configs/{config.ID}/{ComputerID}/Snapshot");
+                string snapVersionResult = await Client.GetStringAsync($"/api/Configs/{ComputerID}/{config.ID}/SnapshotVersion");
+                List<Functions.Objects.Path> paths = JsonConvert.DeserializeObject<List<Functions.Objects.Path>>(snapshotsResult);
 
-                Snapshot snapshot = new Snapshot(config.ID) { Paths = paths };
+                Snapshot snapshot = new Snapshot(config.ID) {Paths = paths, Version = Convert.ToInt32(snapVersionResult)};
 
                 Snapshots.Add(snapshot);
             }

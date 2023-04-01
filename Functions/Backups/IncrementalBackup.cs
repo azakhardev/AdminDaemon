@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Demon.Functions.Objects;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,10 +17,27 @@ namespace Demon.Functions.Backups
 
         }
 
+        public override void Copy(string source, string destination, Snapshot snapshot)
+        {
+            //Pokud cesta existuje v snapshotu tak se metoda returne, jinak složku/soubor zkopíruje do destinace
+            foreach (var path in snapshot.Paths)
+            {
+                if (path.FullPath == source)
+                    return;
+            }
 
-        //Pokud snaphot pro PC neexistuje vytvori ho a postne sa server 
+            base.Copy(source, destination, snapshot);
 
-        //**nefunguje post**
-        //string resultPost = await Core.Client.PostAsync(source);
+            //Vždy přidá source ve formátu Json (jako string) do UpdatedSnapshot
+            Objects.Path snapshotJson = new Objects.Path()
+            {
+                FileName = source.Substring(source.LastIndexOf('\\')),
+                FullPath = source,
+                UpdateTime = DateTime.Now
+            };
+
+            UpdatedSnapshot += JsonConvert.SerializeObject(snapshotJson);
+
+        }        
     }
 }

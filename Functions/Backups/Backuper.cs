@@ -64,7 +64,7 @@ namespace Demon.Functions.Backups
                 }
             }
 
-            //Putna (obnoví) UpdatedSnapshot na server pokud obsahuje nějaký char
+            //Putne (obnoví) UpdatedSnapshot na server pokud obsahuje nějaký char
             if (UpdatedSnapshot != "")
                await Client.PutAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}",UpdatedSnapshot);
 
@@ -95,5 +95,16 @@ namespace Demon.Functions.Backups
                 Copy(subDirectory.FullName, destinationSubDirectory, snapshot);
             }
         }
+
+        //Maže složky z destinace které jsou staré (na podobě Queue - FiFo)
+        public void Deleter(Configs config, Snapshot snapshot) 
+        {
+            if (snapshot.Version > config.MaxPackageAmount) 
+            {
+
+            }
+        }
+
+
     }
 }
