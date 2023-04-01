@@ -19,22 +19,31 @@ namespace Demon.Functions.Backups
 
         }
 
-        //**místo 1 bude ID správného configu**
-        //Pokud snaphot pro PC neexistuje vytvori ho a postne sa server 
-
-        public override void Copy(string source, string destination, bool snapshotExists)
+        //Za osnovu se bera base.Copy, akorát porovná jestli existuje daný záznam v snapshotu 
+        public override void Copy(string source, string destination, Snapshot snapshot)
         {
-            Objects.Path snapshotJson = new Objects.Path()
+            //Pokud cesta existuje v snapshotu tak se metoda returne, jinak složu/soubor zkopíruje do destinace
+            foreach (var path in snapshot.Paths) 
             {
-                FileName = source.Substring(source.LastIndexOf('\\')),
-                FullPath = source,
-                UpdateTime = DateTime.Now
-            };
+                if (path.FullPath == source)
+                    return;
+            }
 
-            base.Copy(source, destination, snapshotExists);
+            base.Copy(source, destination, snapshot);
 
-            if (snapshotExists == false)
+            //Ovšřuje jestli snapshot existuje, pokude ne tak přidá cestu ve formátu Json (jako string) do UpdatedSnapshot
+            if (snapshot == null) 
+            {
+                Objects.Path snapshotJson = new Objects.Path()
+                {
+                    FileName = source.Substring(source.LastIndexOf('\\')),
+                    FullPath = source,
+                    UpdateTime = DateTime.Now
+                };
+
+
                 UpdatedSnapshot += JsonConvert.SerializeObject(snapshotJson);
+            }
         }
     }
 }

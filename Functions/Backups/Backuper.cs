@@ -53,27 +53,27 @@ namespace Demon.Functions.Backups
         //Projede všechny sourcy, pro každý source projede každou destinaci a pro každou destinaci spustí Copy() 
         public virtual async Task ExecBackup(List<Sources> sources, List<Destinations> destinations, Configs config)
         {
-            bool snapshotExists = true;
-            if (Client.GetStringAsync($"api/{config.ID}/{Core.ComputerID}/Snapshot") == null)
-                snapshotExists = false;
+            //if (Client.GetStringAsync($"api/{config.ID}/{Core.ComputerID}/Snapshot") == null)
+            //    snapshotExists = false;
 
             foreach (Sources source in sources)
             {
                 foreach (Destinations destination in destinations)
-                {
-                    Copy(source.SourcePath, destination.DestinationPath,snapshotExists);
+                {                    
+                    Copy(source.SourcePath, destination.DestinationPath, Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault());
                 }
             }
 
+            //Putna (obnoví) UpdatedSnapshot na server pokud obsahuje nějaký char
             if (UpdatedSnapshot != "")
-               await Client.PostAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}",UpdatedSnapshot);
+               await Client.PutAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}",UpdatedSnapshot);
 
         }
 
         //**rozbité kopírování**
         //metoda pro kopírování dat - zkopíruje soubor nebo prázdný soubor který získá z listu sources
         //Odfiltrováno pomocí metody ReturnSourcesToCopy která vrací list cest které je potřeba zkopírovat
-        public virtual void Copy(string source, string destination, bool snapshotExists)
+        public virtual void Copy(string source, string destination, Snapshot snapshot)
         {
             DirectoryInfo sourceDirectory = new DirectoryInfo(source);
             DirectoryInfo destinationDirectory = new DirectoryInfo(destination);
@@ -92,7 +92,7 @@ namespace Demon.Functions.Backups
             foreach (DirectoryInfo subDirectory in sourceDirectory.GetDirectories())
             {
                 string destinationSubDirectory = System.IO.Path.Combine(destinationDirectory.FullName, subDirectory.Name);
-                Copy(subDirectory.FullName, destinationSubDirectory, snapshotExists);
+                Copy(subDirectory.FullName, destinationSubDirectory, snapshot);
             }
         }
     }

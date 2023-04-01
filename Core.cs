@@ -72,7 +72,7 @@ namespace Demon
                     {
                         if (config.ID == backuperConfig.ID)
                             if (CheckSchedule(config) == true)
-                                backuper.ExecBackup(ReturnSourcesToCopy(config), config.Destinations);
+                                backuper.ExecBackup(ReturnSourcesToCopy(config), config.Destinations, config);
                     }
                 }
             }
@@ -80,10 +80,11 @@ namespace Demon
             Backupers.Clear();
         }
 
-        //Metoda která zjistí jestli se má zálohovat config který se jí předá jako argument
+        //Metoda která zjistí jestli se má zálohovat config který se jí předá jako argument - pro cron
         public bool CheckSchedule(Configs config)
         {
-            //metoda pro Cron
+        //    if (config.Schedule == "")
+        //        return true;
             return true;
         }
 
@@ -108,12 +109,15 @@ namespace Demon
         }
 
         //Metoda která přiřadí ke configu jeho snapshot
+        //**Nepřiřazuje ke Configu, ve snapshotu není uložel název configu ani verze**
         public async Task SetSnapshots()
         {
             foreach (Configs config in Configs)
             {
                 string computersConfigsResult = await Client.GetStringAsync($"/api/Configs/{config.ID}/{ComputerID}/Snapshot");
-                Snapshot snapshot = JsonConvert.DeserializeObject<Snapshot>(computersConfigsResult);
+                List<Functions.Objects.Path> paths = JsonConvert.DeserializeObject<List<Functions.Objects.Path>>(computersConfigsResult);
+
+                Snapshot snapshot = new Snapshot(config.ID) { Paths = paths };
 
                 Snapshots.Add(snapshot);
             }
