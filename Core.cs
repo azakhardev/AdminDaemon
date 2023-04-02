@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,7 +24,7 @@ namespace Demon
         //Seznam configů pro daný počítač (ID počítače)
         public List<Configs> Configs { get; set; }
 
-        public List<Logs> Logs { get; set; }
+        public List<Report> Reports { get; set; } = new List<Report>();
 
         public List<Backuper> Backupers { get; set; } = new List<Backuper>();
 
@@ -52,7 +53,7 @@ namespace Demon
             await GetDestinations();
         }
 
-        //Nejdřív by si měl zjistit jestli je povolen/ má přístup do sítě - pokud ne tak načte data z texťáku uloženého na PC
+        //Nejdřív by si měl zjistit jestli je povolen/má přístup do sítě - pokud ne tak načte data z texťáku uloženého na PC
         public void Saver()
         {
             if (Backupers.Count < 1)
@@ -73,6 +74,12 @@ namespace Demon
                             if (CheckSchedule(config) == true)
                                 backuper.ExecBackup(ReturnSourcesToCopy(config), config.Destinations, config);
                     }
+                }
+
+                //Přidá všechny reporty z backuperů do Core
+                foreach (Report report in backuper.Reports)
+                {
+                    this.Reports.Add(report);
                 }
             }
 
@@ -108,7 +115,6 @@ namespace Demon
         }
 
         //Metoda která přiřadí ke configu jeho snapshot
-        //**Nepřiřazuje ke Configu, ve snapshotu není uložel název configu ani verze**
         public async Task SetSnapshots()
         {
             foreach (Configs config in Configs)
@@ -116,6 +122,7 @@ namespace Demon
                 string snapshotsResult = await Client.GetStringAsync($"/api/Configs/{config.ID}/{ComputerID}/Snapshot");
                 Snapshot snapshot = JsonConvert.DeserializeObject<Snapshot>(snapshotsResult);
 
+                snapshot.ConfigID = config.ID;
                 Snapshots.Add(snapshot);
             }
         }
@@ -141,6 +148,15 @@ namespace Demon
                 List<Destinations> destinations = JsonConvert.DeserializeObject<List<Destinations>>(destinationsResult);
 
                 config.Destinations = destinations;
+            }
+        }
+
+        //Postuje všechny reporty z Core na server
+        public async Task PostReports()
+        {
+            foreach (Report report in Reports)
+            {
+                Client.PostAsJsonAsync($"/api/Logs", report);
             }
         }
     }

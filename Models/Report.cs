@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Demon.Models
 {
-    public class Logs
+    public class Report
     {
         public int ID { get; set; }
 

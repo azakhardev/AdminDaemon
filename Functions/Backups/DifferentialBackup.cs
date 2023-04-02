@@ -12,10 +12,6 @@ namespace Demon.Functions.Backups
 {
     public class DifferentialBackup : Backuper
     {
-        public int Retention { get; set; }
-
-        public string FirstPaths { get; set; }
-
         public DifferentialBackup(Core core, string algorithm) : base(core, algorithm)
         {
 
@@ -27,7 +23,7 @@ namespace Demon.Functions.Backups
             base.Copy(source, destination, snapshot);
 
             //Ověřuje jestli snapshot existuje, pokude ne tak přidá cestu ve formátu Json (jako string) do UpdatedPaths
-            if (snapshot == null) 
+            if (snapshot == null)
             {
                 Objects.Path snapshotJson = new Objects.Path()
                 {
@@ -36,7 +32,6 @@ namespace Demon.Functions.Backups
                     UpdateTime = DateTime.Now
                 };
 
-                FirstPaths = JsonConvert.SerializeObject(snapshotJson);
                 UpdatedPaths += JsonConvert.SerializeObject(snapshotJson);
             }
         }

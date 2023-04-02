@@ -10,8 +10,6 @@ namespace Demon.Functions.Backups
 {
     public class IncrementalBackup : Backuper
     {
-        public int Retention { get; set; }
-
         public IncrementalBackup(Core core, string algorithm) : base(core, algorithm)
         {
 

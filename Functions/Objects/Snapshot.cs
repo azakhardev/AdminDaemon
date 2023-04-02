@@ -16,12 +16,6 @@ namespace Demon.Functions.Objects
 
         public List<Path> Paths { get; set; }
 
-        ////Konstruktor zavolá metodu která naplní snapshot daty 
-        //public Snapshot(int configID)
-        //{
-        //    ConfigID = configID;
-        //}
-
         //každá složka v snapshotu uložena v téhle podobě:
         //C:\Users\Artem\Desktop\SSSVT predmety\AJ
         //C:\Users\Artem\Desktop\SSSVT predmety\ČJL

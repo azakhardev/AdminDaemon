@@ -14,7 +14,6 @@ namespace Demon
             Authorization authorizePc = new Authorization();
 
             await authorizePc.Authorize(client);
-
             core.ComputerID = authorizePc.ReturnId();
 
             while (true)
@@ -23,6 +22,7 @@ namespace Demon
 
                 core.Saver();
 
+                await core.PostReports();
                 Thread.Sleep(1000 * 600);
             }
         }
