@@ -14,6 +14,8 @@ namespace Demon.Functions.Backups
     {
         public int Retention { get; set; }
 
+        public string FirstPaths { get; set; }
+
         public DifferentialBackup(Core core, string algorithm) : base(core, algorithm)
         {
 
@@ -34,6 +36,7 @@ namespace Demon.Functions.Backups
                     UpdateTime = DateTime.Now
                 };
 
+                FirstPaths = JsonConvert.SerializeObject(snapshotJson);
                 UpdatedPaths += JsonConvert.SerializeObject(snapshotJson);
             }
         }

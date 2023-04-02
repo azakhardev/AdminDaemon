@@ -23,8 +23,6 @@ namespace Demon.Functions.Backups
 
         public List<Configs> Configs { get; set; } = new List<Configs>();
 
-        public List<string> DestinationsCopied { get; set; } = new List<string>();
-
         public Backuper(Core core, string algorithm)
         {
             Core = core;
@@ -37,25 +35,12 @@ namespace Demon.Functions.Backups
                 if (config.Algorithm == algorithm)
                     Configs.Add(config);
             }
-
-            ////Projedeme všechny snapshoty v core, přidá do this.Snapshots snapshoty u kterých se shoduje typ algoritmu a configID s this.Configs
-            //foreach (Snapshot snap in Core.Snapshots)
-            //{
-            //    foreach (Configs config in this.Configs)
-            //    {
-            //        if (snap.ConfigID == config.ID)
-            //            Snapshots.Add(snap);
-            //    }
-            //}
         }
 
         //Core předá argumenty podle ID Configs/Schedules které se schodují s ID v daném backupru a pak proběhne zálohování dat podle typu zálohování
         //Projede všechny sourcy, pro každý source projede každou destinaci a pro každou destinaci spustí Copy() 
         public virtual async Task ExecBackup(List<Sources> sources, List<Destinations> destinations, Configs config)
         {
-            //if (Client.GetStringAsync($"api/{config.ID}/{Core.ComputerID}/Snapshot") == null)
-            //    snapshotExists = false;
-
             foreach (Sources source in sources)
             {
                 foreach (Destinations destination in destinations)
@@ -65,15 +50,7 @@ namespace Demon.Functions.Backups
             }
 
             //Obnoví v Core snapshot pro daný config
-            Snapshot updatedSnap = Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault();
-            if (UpdatedPaths != "")
-            {
-                updatedSnap.ConfigID = config.ID;
-                updatedSnap.Version++;
-                updatedSnap.Paths.Add(JsonConvert.DeserializeObject<Objects.Path>(UpdatedPaths));
-            }
-            //Putne (obnoví) updatedSnap na server po kažé záloze
-            await Client.PutAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}", updatedSnap);
+            await UpdateSnapshot(config, destinations);
         }
 
         //Metoda pro kopírování dat - zkopíruje soubor nebo prázdný soubor který získá z listu sources
@@ -90,28 +67,65 @@ namespace Demon.Functions.Backups
 
             foreach (FileInfo file in sourceDirectory.GetFiles())
             {
-                string destinationFile = System.IO.Path.Combine(destinationDirectory.FullName, file.Name);
+                string destinationFile = System.IO.Path.Combine($"{destinationDirectory.FullName}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}", file.Name);
                 file.CopyTo(destinationFile, true);
             }
 
             foreach (DirectoryInfo subDirectory in sourceDirectory.GetDirectories())
             {
-                string destinationSubDirectory = System.IO.Path.Combine(destinationDirectory.FullName, subDirectory.Name);
+                string destinationSubDirectory = System.IO.Path.Combine($"{destinationDirectory.FullName}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}", subDirectory.Name);
                 Copy(subDirectory.FullName, destinationSubDirectory, snapshot);
             }
         }
 
         //Maže složky z destinace které jsou staré (na podobě Queue - FiFo)
-        public void Deleter(Configs config, Snapshot snapshot, Destinations destination)
+        public void DeleteOld(Configs config, Snapshot snapshot, Destinations destination)
         {
-            if (snapshot.Version > config.MaxPackageAmount)
+            int packageVersionToDelete = snapshot.PackageVersion % config.MaxPackageAmount + (snapshot.PackageVersion - (snapshot.PackageVersion % config.MaxPackageAmount));
+            for (int i = 1; i <= config.MaxPackageSize; i++)
             {
-                DirectoryInfo destinationDirectory = new DirectoryInfo(DestinationsCopied.First());
+                DirectoryInfo destinationDirectory = new DirectoryInfo($"{destination.DestinationPath}\\{packageVersionToDelete}_{config.Algorithm}_{i}");
                 destinationDirectory.Delete();
-                DestinationsCopied.RemoveAt(DestinationsCopied.IndexOf(DestinationsCopied.First()));
             }
         }
 
+        //Obnoví snapshot - změníme verze a cesty v snapshotu a pak je putneme
+        public async Task UpdateSnapshot(Configs config, List<Destinations> destinations)
+        {
+            //Nastavíme referenci updatedSnap na příslušný snapshot v Core
+            Snapshot updatedSnap = Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault();
 
+            //Nastavíme updatedSnapu verzi balíčku, pokud přesahuje maximální množství balíčků tak se odstraní nejstarší balíček
+            if (++updatedSnap.PackagePartVersion > config.MaxPackageSize)
+            {
+                if (++updatedSnap.PackageVersion > config.MaxPackageAmount)
+                {
+                    foreach (Destinations destination in destinations)
+                    {
+                        DeleteOld(config, updatedSnap, destination);
+                    }
+                    updatedSnap.PackageVersion++;
+                }
+                else
+                {
+                    updatedSnap.PackageVersion++;
+                }
+
+                updatedSnap.PackagePartVersion = 1;
+            }
+            else
+            {
+                updatedSnap.PackagePartVersion++;
+            }
+
+            //Pokud cesta není prázdná a algoritmus není Full tak updatne cesty
+            if (UpdatedPaths != "" && Algorithm != "Full")
+            {
+                updatedSnap.Paths.Add(JsonConvert.DeserializeObject<Objects.Path>(UpdatedPaths));
+            }
+
+            //Putne (obnoví) updatedSnap na server po kažé záloze
+            await Client.PutAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}", updatedSnap);
+        }
     }
 }

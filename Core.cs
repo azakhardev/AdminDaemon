@@ -82,8 +82,8 @@ namespace Demon
         //Metoda která zjistí jestli se má zálohovat config který se jí předá jako argument - pro cron
         public bool CheckSchedule(Configs config)
         {
-        //    if (config.Schedule == "")
-        //        return true;
+            //    if (config.Schedule == "")
+            //        return true;
             return true;
         }
 
@@ -119,28 +119,6 @@ namespace Demon
                 Snapshots.Add(snapshot);
             }
         }
-
-        ////Metoda která zjistí ID počítače v databázi pokud je jeho ID = 0
-        //public async Task GetComputerID()
-        //{
-        //    //ID comupteru se určí tak že se zažádá o seznam všech počítačů a počítač u kterého se shoduje MacAdresa s MacAdresou ze seznamu bude tento počítač s ID příslušné MacAdersy 
-        //    string macAddressesResult = await Client.GetStringAsync($"/api/MacAddresses");
-        //    List<MacAddresses> macAddresses = JsonConvert.DeserializeObject<List<MacAddresses>>(macAddressesResult);
-
-        //    foreach (string macAddress in GetComputersMacAddresses())
-        //    {
-        //        if (ComputerID != 0)
-        //            break;
-        //        foreach (MacAddresses item in macAddresses)
-        //        {
-        //            if (macAddress == item.MacAddress)
-        //            {
-        //                ComputerID = item.ComputerID;
-        //                break;
-        //            }
-        //        }
-        //    }
-        //}
 
         //Metoda která přiřadí List<Sources> ke správnému configu
         public async Task GetSources()

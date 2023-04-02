@@ -10,7 +10,9 @@ namespace Demon.Functions.Objects
     {
         public int ConfigID { get; set; }
 
-        public int Version { get; set; }
+        public int PackageVersion { get; set; } = 0;
+
+        public int PackagePartVersion { get; set; } = 0;
 
         public List<Path> Paths { get; set; }
 
