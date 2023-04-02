@@ -23,7 +23,7 @@ namespace Demon.Functions.Backups
 
         public List<Configs> Configs { get; set; } = new List<Configs>();
 
-        public List<Report> Reports { get; set; }
+        public List<Report> Reports { get; set; } = new List<Report>();
 
         public Backuper(Core core, string algorithm)
         {
