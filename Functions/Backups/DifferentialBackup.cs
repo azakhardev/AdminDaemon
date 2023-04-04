@@ -22,8 +22,8 @@ namespace Demon.Functions.Backups
         {
             base.Copy(source, destination, snapshot);
 
-            //Ověřuje jestli snapshot existuje, pokude ne tak přidá cestu ve formátu Json (jako string) do UpdatedPaths
-            if (snapshot == null)
+            //Ověřuje jestli snapshot obsahuje nějaké cesty, pokude ne tak přidá cestu ve formátu Json (jako string) do UpdatedPaths
+            if (!snapshot.Paths.Any())
             {
                 Objects.Path snapshotJson = new Objects.Path()
                 {
