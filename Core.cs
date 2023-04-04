@@ -56,12 +56,10 @@ namespace Demon
         //Nejdřív by si měl zjistit jestli je povolen/má přístup do sítě - pokud ne tak načte data z texťáku uloženého na PC
         public void Saver()
         {
-            if (Backupers.Count < 1)
-            {
-                Backupers.Add(new FullBackup(this, "Full"));
-                Backupers.Add(new DifferentialBackup(this, "Differential"));
-                Backupers.Add(new IncrementalBackup(this, "Incremental"));
-            }
+            Backupers.Add(new FullBackup(this, "Full"));
+            Backupers.Add(new DifferentialBackup(this, "Differential"));
+            Backupers.Add(new IncrementalBackup(this, "Incremental"));
+
 
             //Forcyklem prjedeme všechny configy, pokud se ID configu v Coru shoduje s ID configu v Backuperu a je čas pro zálohu tak se spustí záloha > předá se list sourců a pathů pro daný config
             foreach (Backuper backuper in Backupers)
@@ -122,7 +120,11 @@ namespace Demon
                 string snapshotsResult = await Client.GetStringAsync($"/api/Configs/{config.ID}/{ComputerID}/Snapshot");
                 Snapshot snapshot = JsonConvert.DeserializeObject<Snapshot>(snapshotsResult);
 
-                snapshot.ConfigID = config.ID;
+                if (snapshot != null)
+                    snapshot.ConfigID = config.ID;
+                else
+                    snapshot = new Snapshot() { ConfigID = config.ID, PackageVersion = 1, PackagePartVersion = 1, Paths = new List<Functions.Objects.Path>() };
+
                 Snapshots.Add(snapshot);
             }
         }
