@@ -36,7 +36,8 @@ namespace Demon
                 ComputerName = Environment.MachineName,
                 Description = "New computer",
                 ComputerStatus = "unauthorized",
-                MacAddresses = GetComputersMacAddresses()
+                BackupStatus = "",
+                LastBackup = DateTime.Now
             };
 
             var item = await client.PostAsJsonAsync("api/computers", pc);
@@ -59,8 +60,8 @@ namespace Demon
         }
 
 
-        //Metoda která zjistí všechny MacAdresy počítače
-        public List<string> GetComputersMacAddresses()
+        //Metoda která vrací všechny MacAdresy počítače
+        public List<string> ReturnComputersMacAddresses()
         {
             List<string> macAddresses = new List<string>();
             NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
