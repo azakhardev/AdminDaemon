@@ -101,9 +101,9 @@ namespace Demon
             {
                 foreach (Snapshot snaphsot in Snapshots)
                 {
-                    foreach (Functions.Objects.Path path in snaphsot.Paths)
+                    foreach (var path in snaphsot.Paths)
                     {
-                        if (source.SourcePath != path.FullPath.Replace(path.FileName, "") && source.FileName != path.FileName)
+                        if (source.SourcePath != path.FullPath && source.FileName != path.FileName)
                             paths.Add(source);
                     }
                 }
@@ -123,7 +123,16 @@ namespace Demon
                 if (snapshot != null)
                     snapshot.ConfigID = config.ID;
                 else
-                    snapshot = new Snapshot() { ConfigID = config.ID, PackageVersion = 1, PackagePartVersion = 1, Paths = new List<Functions.Objects.Path>() };
+                {
+                    Functions.Objects.Path path = new Functions.Objects.Path() {FileName = "", FullPath = "", UpdateTime = DateTime.Now };
+                    snapshot = new Snapshot()
+                    {
+                        ConfigID = config.ID,
+                        PackageVersion = 1,
+                        PackagePartVersion = 1,
+                        Paths = new List<Functions.Objects.Path>() {path}
+                    };
+                }
 
                 Snapshots.Add(snapshot);
             }
