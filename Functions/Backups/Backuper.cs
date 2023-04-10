@@ -71,7 +71,7 @@ namespace Demon.Functions.Backups
             }
             catch (Exception)
             {
-                Report log = new Report() { Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destination} on computer with ID: {Core.ComputerID}" };
+                Report log = new Report(Core.ComputerID,snapshot.ConfigID,Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destination} on computer with ID: {Core.ComputerID}" };
                 Reports.Add(log);
             }
 
@@ -84,7 +84,7 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception)
                 {
-                    Report log = new Report() { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
+                    Report log = new Report(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
                     Reports.Add(log);
                 }
             }
@@ -98,7 +98,7 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception)
                 {
-                    Report log = new Report() { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
+                    Report log = new Report(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
                     Reports.Add(log);
                 }
             }
@@ -174,8 +174,8 @@ namespace Demon.Functions.Backups
                 updatedSnap.Paths.Add(JsonConvert.DeserializeObject<Objects.Path>(UpdatedPaths));
             }
 
-            //Putne (obnoví) updatedSnap na server po kažé záloze            
-            await Client.PutAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}", JsonConvert.SerializeObject(updatedSnap));
+            //Putne (obnoví) updatedSnap na server po každé záloze            
+            await Client.PutAsJsonAsync($"api/Computers/Snapshot/{config.ID}/{Core.ComputerID}", updatedSnap);
         }
     }
 }
