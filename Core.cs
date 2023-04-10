@@ -60,7 +60,6 @@ namespace Demon
             Backupers.Add(new DifferentialBackup(this, "Differential"));
             Backupers.Add(new IncrementalBackup(this, "Incremental"));
 
-
             //Forcyklem prjedeme všechny configy, pokud se ID configu v Coru shoduje s ID configu v Backuperu a je čas pro zálohu tak se spustí záloha > předá se list sourců a pathů pro daný config
             foreach (Backuper backuper in Backupers)
             {
@@ -120,9 +119,7 @@ namespace Demon
                 string snapshotsResult = await Client.GetStringAsync($"/api/Configs/{config.ID}/{ComputerID}/Snapshot");
                 Snapshot snapshot = JsonConvert.DeserializeObject<Snapshot>(snapshotsResult);
 
-                if (snapshot != null)
-                    snapshot.ConfigID = config.ID;
-                else
+                if (snapshot == null)
                 {
                     Functions.Objects.Path path = new Functions.Objects.Path() {FileName = "", FullPath = "", UpdateTime = DateTime.Now };
                     snapshot = new Snapshot()

@@ -38,7 +38,7 @@ namespace Demon.Functions.Backups
                     Configs.Add(config);
             }
         }
-        
+
         //Core předá argumenty podle ID Configs/Schedules které se schodují s ID v daném backupru a pak proběhne zálohování dat podle typu zálohování
         //Projede všechny sourcy, pro každý source projede každou destinaci a pro každou destinaci spustí Copy() 
         public virtual async Task ExecBackup(List<Sources> sources, List<Destinations> destinations, Configs config)
@@ -46,8 +46,8 @@ namespace Demon.Functions.Backups
             foreach (Sources source in sources)
             {
                 foreach (Destinations destination in destinations)
-                {                    
-                    Copy(source.SourcePath, destination.DestinationPath, Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault());
+                {
+                    CopyMain(source.SourcePath, destination.DestinationPath, Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault());
                 }
             }
 
@@ -57,10 +57,10 @@ namespace Demon.Functions.Backups
 
         //Metoda pro kopírování dat - zkopíruje soubor nebo prázdný soubor který získá z listu sources
         //Odfiltrováno pomocí metody ReturnSourcesToCopy která vrací list cest které nejsou ve snapshotu
-        public virtual void Copy(string source, string destination, Snapshot snapshot)
+        public virtual void CopyMain(string source, string destination, Snapshot snapshot)
         {
             DirectoryInfo sourceDirectory = new DirectoryInfo(source);
-            DirectoryInfo destinationDirectory = new DirectoryInfo(destination);
+            DirectoryInfo destinationDirectory = new DirectoryInfo(($"{destination}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}"));
 
             try
             {
@@ -79,7 +79,7 @@ namespace Demon.Functions.Backups
             {
                 try
                 {
-                    string destinationFile = System.IO.Path.Combine($"{destinationDirectory.FullName}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}", file.Name);
+                    string destinationFile = System.IO.Path.Combine(destinationDirectory.FullName, file.Name);
                     file.CopyTo(destinationFile, true);
                 }
                 catch (Exception)
@@ -93,14 +93,37 @@ namespace Demon.Functions.Backups
             {
                 try
                 {
-                    string destinationSubDirectory = System.IO.Path.Combine($"{destinationDirectory.FullName}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}", subDirectory.Name);
-                    Copy(subDirectory.FullName, destinationSubDirectory, snapshot);
+                    string destinationSubDirectory = System.IO.Path.Combine(destinationDirectory.FullName, subDirectory.Name);
+                    Copy(subDirectory.FullName, destinationSubDirectory);
                 }
                 catch (Exception)
                 {
                     Report log = new Report() { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
                     Reports.Add(log);
                 }
+            }
+        }
+
+        public virtual void Copy(string source, string destination)
+        {
+            DirectoryInfo sourceDirectory = new DirectoryInfo(source);
+            DirectoryInfo destinationDirectory = new DirectoryInfo(destination);
+
+            if (!destinationDirectory.Exists)
+            {
+                destinationDirectory.Create();
+            }
+
+            foreach (FileInfo file in sourceDirectory.GetFiles())
+            {
+                string destinationFile = System.IO.Path.Combine(destinationDirectory.FullName, file.Name);
+                file.CopyTo(destinationFile, true);
+            }
+
+            foreach (DirectoryInfo subDirectory in sourceDirectory.GetDirectories())
+            {
+                string destinationSubDirectory = System.IO.Path.Combine(destinationDirectory.FullName, subDirectory.Name);
+                Copy(subDirectory.FullName, destinationSubDirectory);
             }
         }
 
@@ -123,9 +146,9 @@ namespace Demon.Functions.Backups
             Snapshot updatedSnap = Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault();
 
             //Nastavíme updatedSnapu verzi balíčku, pokud přesahuje maximální množství balíčků tak se odstraní nejstarší balíček
-            if (++updatedSnap.PackagePartVersion > config.MaxPackageSize)
+            if (updatedSnap.PackagePartVersion >= config.MaxPackageSize)
             {
-                if (++updatedSnap.PackageVersion > config.MaxPackageAmount)
+                if (updatedSnap.PackageVersion >= config.MaxPackageAmount)
                 {
                     foreach (Destinations destination in destinations)
                     {
@@ -144,15 +167,15 @@ namespace Demon.Functions.Backups
             {
                 updatedSnap.PackagePartVersion++;
             }
-                        
+
             //Pokud cesta není prázdná a algoritmus není Full tak updatne cesty
             if (UpdatedPaths != "" && Algorithm != "Full")
             {
                 updatedSnap.Paths.Add(JsonConvert.DeserializeObject<Objects.Path>(UpdatedPaths));
             }
 
-            //Putne (obnoví) updatedSnap na server po kažé záloze
-            await Client.PutAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}", updatedSnap);
+            //Putne (obnoví) updatedSnap na server po kažé záloze            
+            await Client.PutAsJsonAsync($"api/Computers/Snapshot/{Core.ComputerID}/{config.ID}", JsonConvert.SerializeObject(updatedSnap));
         }
     }
 }

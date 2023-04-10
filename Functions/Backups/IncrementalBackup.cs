@@ -15,9 +15,9 @@ namespace Demon.Functions.Backups
 
         }
 
-        public override void Copy(string source, string destination, Snapshot snapshot)
+        public override void CopyMain(string source, string destination, Snapshot snapshot)
         {
-            base.Copy(source, destination, snapshot);
+            base.CopyMain(source, destination, snapshot);
 
             //Vždy přidá source ve formátu Json (jako string) do UpdatedPaths
             Objects.Path snapshotJson = new Objects.Path()
