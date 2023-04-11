@@ -62,18 +62,20 @@ namespace Demon.Functions.Backups
             DirectoryInfo sourceDirectory = new DirectoryInfo(source);
             DirectoryInfo destinationDirectory = new DirectoryInfo(($"{destination}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}"));
 
-            try
+
+            if (!destinationDirectory.Exists)
             {
-                if (!destinationDirectory.Exists)
+                try
                 {
                     destinationDirectory.Create();
                 }
+                catch (Exception)
+                {
+                    Report log = new Report(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destination} on computer with ID: {Core.ComputerID}" };
+                    Reports.Add(log);
+                }
             }
-            catch (Exception)
-            {
-                Report log = new Report(Core.ComputerID,snapshot.ConfigID,Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destination} on computer with ID: {Core.ComputerID}" };
-                Reports.Add(log);
-            }
+
 
             foreach (FileInfo file in sourceDirectory.GetFiles())
             {
@@ -175,7 +177,15 @@ namespace Demon.Functions.Backups
             }
 
             //Putne (obnoví) updatedSnap na server po každé záloze            
-            await Client.PutAsJsonAsync($"api/Computers/Snapshot/{config.ID}/{Core.ComputerID}", updatedSnap);
+            Snapshot snapshot = new Snapshot() { 
+                ConfigID = config.ID,
+                PackagePartVersion = updatedSnap.PackagePartVersion,
+                PackageVersion = updatedSnap.PackageVersion,
+                Paths = updatedSnap.Paths
+            };
+            SnapshotPut snap = new SnapshotPut(snapshot, Core.ComputerID, snapshot.ConfigID );
+
+            var result = await Client.PutAsJsonAsync("api/Computers/Snapshot", snap);
         }
     }
 }

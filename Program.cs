@@ -1,4 +1,7 @@
-﻿using System.Net;
+﻿using Demon.Functions.Objects;
+using Demon.Models;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace Demon
 {
@@ -18,6 +21,7 @@ namespace Demon
 
             while (true)
             {
+
                 await core.GetDataFromAPI();
 
                 core.Saver();
