@@ -94,21 +94,29 @@ namespace Demon
         //Metoda která vrací list cest pro zadaný config ke složkám které by se měly nakopírovat
         public List<Sources> ReturnSourcesToCopy(Configs config)
         {
-            List<Sources> paths = new List<Sources>();
+            List<Sources> sources = new List<Sources>();
 
             foreach (Sources source in config.Sources)
             {
                 foreach (Snapshot snaphsot in Snapshots)
                 {
+                    bool pathExists = false;
+                    
                     foreach (var path in snaphsot.Paths)
                     {
-                        if (source.SourcePath != path.FullPath && source.FileName != path.FileName)
-                            paths.Add(source);
+                        if (source.SourcePath == path.FullPath)
+                        {
+                            pathExists = true;
+                            break;
+                        }
                     }
+
+                    if (pathExists == false)
+                        sources.Add(source);
                 }
             }
 
-            return paths;
+            return sources;
         }
 
         //Metoda která přiřadí ke configu jeho snapshot
@@ -127,7 +135,7 @@ namespace Demon
                         ConfigID = config.ID,
                         PackageVersion = 1,
                         PackagePartVersion = 1,
-                        Paths = new List<Functions.Objects.Path>() {path}
+                        Paths = new List<Functions.Objects.Path>()
                     };
                 }
 

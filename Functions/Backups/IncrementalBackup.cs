@@ -20,15 +20,37 @@ namespace Demon.Functions.Backups
             base.CopyMain(source, destination, snapshot);
 
             //Vždy přidá source ve formátu Json (jako string) do UpdatedPaths
-            Objects.Path snapshotJson = new Objects.Path()
+            DirectoryInfo directoryInfo = new DirectoryInfo(source);
+            UpdatePaths(directoryInfo);
+
+        }
+
+        public void UpdatePaths(DirectoryInfo directoryInfo)
+        {
+            foreach (var dir in directoryInfo.GetDirectories())
             {
-                FileName = source.Substring(source.LastIndexOf('\\')),
-                FullPath = source,
-                UpdateTime = DateTime.Now
-            };
+                Objects.Path snapshotJson = new Objects.Path()
+                {
+                    FileName = dir.Name,
+                    FullPath = dir.FullName,
+                    UpdateTime = DateTime.Now
+                };
 
-            UpdatedPaths += JsonConvert.SerializeObject(snapshotJson);
+                UpdatedPaths += JsonConvert.SerializeObject(snapshotJson);
+                UpdatePaths(dir);
+            }
 
-        }        
+            foreach (var file in directoryInfo.GetFiles())
+            {
+                Objects.Path snapshotJson = new Objects.Path()
+                {
+                    FileName = file.Name,
+                    FullPath = file.FullName,
+                    UpdateTime = DateTime.Now
+                };
+
+                UpdatedPaths += JsonConvert.SerializeObject(snapshotJson);
+            }
+        }
     }
 }

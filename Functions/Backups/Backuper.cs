@@ -133,7 +133,7 @@ namespace Demon.Functions.Backups
         //DeleteOld - virtual => každá třída si z toho bude ukládat snapshot pro retenci (kromě inceremntal??)
         public virtual void DeleteOld(Configs config, Snapshot snapshot, Destinations destination)
         {
-            int packageVersionToDelete = snapshot.PackageVersion % config.MaxPackageAmount + (snapshot.PackageVersion - (snapshot.PackageVersion % config.MaxPackageAmount));
+            int packageVersionToDelete = snapshot.PackageVersion % config.MaxPackageAmount + (snapshot.PackageVersion - config.MaxPackageAmount);
             for (int i = 1; i <= config.MaxPackageSize; i++)
             {
                 DirectoryInfo destinationDirectory = new DirectoryInfo($"{destination.DestinationPath}\\{packageVersionToDelete}_{config.Algorithm}_{i}");
@@ -148,22 +148,22 @@ namespace Demon.Functions.Backups
             Snapshot updatedSnap = Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault();
 
             //Nastavíme updatedSnapu verzi balíčku, pokud přesahuje maximální množství balíčků tak se odstraní nejstarší balíček
-            if (updatedSnap.PackagePartVersion >= config.MaxPackageSize)
+            if (updatedSnap.PackageVersion > config.MaxPackageAmount)
             {
-                if (updatedSnap.PackageVersion >= config.MaxPackageAmount)
+
+                foreach (Destinations destination in destinations)
                 {
-                    foreach (Destinations destination in destinations)
-                    {
-                        DeleteOld(config, updatedSnap, destination);
-                    }
+                    DeleteOld(config, updatedSnap, destination);
+                }
+
+                if (updatedSnap.PackagePartVersion > config.MaxPackageSize) 
+                {
+                    updatedSnap.PackagePartVersion = 1;
                     updatedSnap.PackageVersion++;
                 }
                 else
-                {
-                    updatedSnap.PackageVersion++;
-                }
+                    updatedSnap.PackagePartVersion++;
 
-                updatedSnap.PackagePartVersion = 1;
             }
             else
             {
@@ -177,13 +177,14 @@ namespace Demon.Functions.Backups
             }
 
             //Putne (obnoví) updatedSnap na server po každé záloze            
-            Snapshot snapshot = new Snapshot() { 
+            Snapshot snapshot = new Snapshot()
+            {
                 ConfigID = config.ID,
                 PackagePartVersion = updatedSnap.PackagePartVersion,
                 PackageVersion = updatedSnap.PackageVersion,
                 Paths = updatedSnap.Paths
             };
-            SnapshotPut snap = new SnapshotPut(snapshot, Core.ComputerID, snapshot.ConfigID );
+            SnapshotPut snap = new SnapshotPut(snapshot, Core.ComputerID, snapshot.ConfigID);
 
             var result = await Client.PutAsJsonAsync("api/Computers/Snapshot", snap);
         }
