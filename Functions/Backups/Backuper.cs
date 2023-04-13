@@ -3,6 +3,7 @@ using Demon.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Json;
 using System.Text;
@@ -19,11 +20,11 @@ namespace Demon.Functions.Backups
 
         public string Algorithm { get; set; }
 
-        public string UpdatedPaths { get; set; } = "";
+        public List<Objects.Path> UpdatedPaths { get; set; } = new List<Objects.Path>();
 
         public List<Configs> Configs { get; set; } = new List<Configs>();
 
-        public List<Report> Reports { get; set; } = new List<Report>();
+        public List<Log> Reports { get; set; } = new List<Log>();
 
         public Backuper(Core core, string algorithm)
         {
@@ -57,28 +58,74 @@ namespace Demon.Functions.Backups
 
         //Metoda pro kopírování dat - zkopíruje soubor nebo prázdný soubor který získá z listu sources
         //Odfiltrováno pomocí metody ReturnSourcesToCopy která vrací list cest které nejsou ve snapshotu
-        public virtual void CopyMain(string source, string destination, Snapshot snapshot)
+        public virtual void CopyMain(string sourcePath, string destination, Snapshot snapshot)
         {
-            DirectoryInfo sourceDirectory = new DirectoryInfo(source);
+            DirectoryInfo sourceDirectory = new DirectoryInfo(sourcePath);
             DirectoryInfo destinationDirectory = new DirectoryInfo(($"{destination}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}"));
 
+            List<string> matchingPaths = new List<string>();
+            foreach (var path in snapshot.Paths)
+            {
+                foreach (var item in TraverseDirectories(sourcePath, path.FullPath))
+                {
+                    matchingPaths.Add(item);
+                }
+            }
+            TryToCopy(sourceDirectory, destinationDirectory, snapshot, matchingPaths);
+        }
+
+        public List<string> TraverseDirectories(string currentDir, string snapshotPath)
+        {
+            List<string> matchingPaths = new List<string>();
+            foreach (string file in Directory.GetFiles(currentDir))
+            {
+                if (snapshotPath == file)
+                    matchingPaths.Add(file);
+            }
+
+            foreach (string subDir in Directory.GetDirectories(currentDir))
+            {
+                TraverseDirectories(subDir, snapshotPath);
+                if (snapshotPath == subDir)
+                    matchingPaths.Add(subDir);
+            }
+
+            return matchingPaths;
+        }
+
+        public void TryToCopy(DirectoryInfo sourceDirectory, DirectoryInfo destinationDirectory, Snapshot snapshot, List<string> matchingPaths)
+        {
 
             if (!destinationDirectory.Exists)
             {
+                foreach (var item in matchingPaths)
+                {
+                    if (item == destinationDirectory.FullName)
+                    {
+                        return;
+                    }
+                }
                 try
                 {
                     destinationDirectory.Create();
                 }
                 catch (Exception)
                 {
-                    Report log = new Report(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destination} on computer with ID: {Core.ComputerID}" };
+                    Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destinationDirectory} on computer with ID: {Core.ComputerID}" };
                     Reports.Add(log);
                 }
             }
 
-
             foreach (FileInfo file in sourceDirectory.GetFiles())
             {
+                foreach (var item in matchingPaths)
+                {
+                    if (item == file.FullName)
+                    {
+                        return;
+                    }
+                }
+
                 try
                 {
                     string destinationFile = System.IO.Path.Combine(destinationDirectory.FullName, file.Name);
@@ -86,13 +133,21 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception)
                 {
-                    Report log = new Report(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
+                    Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
                     Reports.Add(log);
                 }
             }
 
             foreach (DirectoryInfo subDirectory in sourceDirectory.GetDirectories())
             {
+                foreach (var item in matchingPaths)
+                {
+                    if (item == subDirectory.FullName)
+                    {
+                        return;
+                    }
+                }
+
                 try
                 {
                     string destinationSubDirectory = System.IO.Path.Combine(destinationDirectory.FullName, subDirectory.Name);
@@ -100,7 +155,7 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception)
                 {
-                    Report log = new Report(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
+                    Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
                     Reports.Add(log);
                 }
             }
@@ -156,7 +211,7 @@ namespace Demon.Functions.Backups
                     DeleteOld(config, updatedSnap, destination);
                 }
 
-                if (updatedSnap.PackagePartVersion > config.MaxPackageSize) 
+                if (updatedSnap.PackagePartVersion >= config.MaxPackageSize)
                 {
                     updatedSnap.PackagePartVersion = 1;
                     updatedSnap.PackageVersion++;
@@ -171,9 +226,9 @@ namespace Demon.Functions.Backups
             }
 
             //Pokud cesta není prázdná a algoritmus není Full tak updatne cesty
-            if (UpdatedPaths != "" && Algorithm != "Full")
+            if (UpdatedPaths.Count != 0 && Algorithm != "Full")
             {
-                updatedSnap.Paths.Add(JsonConvert.DeserializeObject<Objects.Path>(UpdatedPaths));
+                updatedSnap.Paths = UpdatedPaths;
             }
 
             //Putne (obnoví) updatedSnap na server po každé záloze            
@@ -184,8 +239,8 @@ namespace Demon.Functions.Backups
                 PackageVersion = updatedSnap.PackageVersion,
                 Paths = updatedSnap.Paths
             };
-            SnapshotPut snap = new SnapshotPut(snapshot, Core.ComputerID, snapshot.ConfigID);
 
+            SnapshotPut snap = new SnapshotPut(snapshot, Core.ComputerID, snapshot.ConfigID);
             var result = await Client.PutAsJsonAsync("api/Computers/Snapshot", snap);
         }
     }

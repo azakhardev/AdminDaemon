@@ -37,6 +37,7 @@ namespace Demon.Functions.Backups
             }
         }
 
+        //Metoda na přidání cest do snapshotu
         public void UpdatePaths(DirectoryInfo directoryInfo)
         {
             foreach (var dir in directoryInfo.GetDirectories())
@@ -48,7 +49,7 @@ namespace Demon.Functions.Backups
                     UpdateTime = DateTime.Now
                 };
 
-                UpdatedPaths += JsonConvert.SerializeObject(snapshotJson);
+                UpdatedPaths.Add(snapshotJson);
                 UpdatePaths(dir);
             }
 
@@ -61,7 +62,7 @@ namespace Demon.Functions.Backups
                     UpdateTime = DateTime.Now
                 };
 
-                UpdatedPaths += JsonConvert.SerializeObject(snapshotJson);
+                UpdatedPaths.Add(snapshotJson);
             }
         }
     }

@@ -24,7 +24,7 @@ namespace Demon
         //Seznam configů pro daný počítač (ID počítače)
         public List<Configs> Configs { get; set; }
 
-        public List<Report> Reports { get; set; } = new List<Report>();
+        public List<Log> Reports { get; set; } = new List<Log>();
 
         public List<Backuper> Backupers { get; set; } = new List<Backuper>();
 
@@ -74,7 +74,7 @@ namespace Demon
                 }
 
                 //Přidá všechny reporty z backuperů do Core
-                foreach (Report report in backuper.Reports)
+                foreach (Log report in backuper.Reports)
                 {
                     this.Reports.Add(report);
                 }
@@ -101,7 +101,7 @@ namespace Demon
                 foreach (Snapshot snaphsot in Snapshots)
                 {
                     bool pathExists = false;
-                    
+
                     foreach (var path in snaphsot.Paths)
                     {
                         if (source.SourcePath == path.FullPath)
@@ -129,7 +129,7 @@ namespace Demon
 
                 if (snapshot == null)
                 {
-                    Functions.Objects.Path path = new Functions.Objects.Path() {FileName = "", FullPath = "", UpdateTime = DateTime.Now };
+                    Functions.Objects.Path path = new Functions.Objects.Path() { FileName = "", FullPath = "", UpdateTime = DateTime.Now };
                     snapshot = new Snapshot()
                     {
                         ConfigID = config.ID,
@@ -170,10 +170,12 @@ namespace Demon
         //Postuje všechny reporty z Core na server
         public async Task PostReports()
         {
-            foreach (Report report in Reports)
+            foreach (Log report in Reports)
             {
                 Client.PostAsJsonAsync($"/api/Logs", report);
             }
         }
+
+
     }
 }

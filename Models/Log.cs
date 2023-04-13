@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Demon.Models
 {
-    public class Report
+    public class Log
     {
         public int ID { get; set; }
 
@@ -19,7 +19,7 @@ namespace Demon.Models
 
         public string Message { get; set; }
 
-        public Report(int computerId, int configId, HttpClient client)
+        public Log(int computerId, int configId, HttpClient client)
         {
             var ResultId = GetCpsCfgsId(computerId, configId, client);
             ComputersConfigsID = Convert.ToInt32(ResultId);
