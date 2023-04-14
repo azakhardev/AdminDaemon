@@ -95,16 +95,9 @@ namespace Demon.Functions.Backups
 
         public void TryToCopy(DirectoryInfo sourceDirectory, DirectoryInfo destinationDirectory, Snapshot snapshot, List<string> matchingPaths)
         {
-
+            bool stop = false;
             if (!destinationDirectory.Exists)
             {
-                foreach (var item in matchingPaths)
-                {
-                    if (item == destinationDirectory.FullName)
-                    {
-                        return;
-                    }
-                }
                 try
                 {
                     destinationDirectory.Create();
@@ -121,21 +114,22 @@ namespace Demon.Functions.Backups
                 foreach (var item in matchingPaths)
                 {
                     if (item == file.FullName)
-                    {
-                        return;
-                    }
+                        stop = true;
                 }
 
-                try
-                {
-                    string destinationFile = System.IO.Path.Combine(destinationDirectory.FullName, file.Name);
-                    file.CopyTo(destinationFile, true);
-                }
-                catch (Exception)
-                {
-                    Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
-                    Reports.Add(log);
-                }
+                if (stop == false)
+                    try
+                    {
+                        string destinationFile = System.IO.Path.Combine(destinationDirectory.FullName, file.Name);
+                        file.CopyTo(destinationFile, true);
+                    }
+                    catch (Exception)
+                    {
+                        Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
+                        Reports.Add(log);
+                    }
+
+                stop = false;
             }
 
             foreach (DirectoryInfo subDirectory in sourceDirectory.GetDirectories())
@@ -143,21 +137,22 @@ namespace Demon.Functions.Backups
                 foreach (var item in matchingPaths)
                 {
                     if (item == subDirectory.FullName)
-                    {
-                        return;
-                    }
+                        stop = true;
                 }
 
-                try
-                {
-                    string destinationSubDirectory = System.IO.Path.Combine(destinationDirectory.FullName, subDirectory.Name);
-                    Copy(subDirectory.FullName, destinationSubDirectory);
-                }
-                catch (Exception)
-                {
-                    Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
-                    Reports.Add(log);
-                }
+                if (stop == false)
+                    try
+                    {
+                        string destinationSubDirectory = System.IO.Path.Combine(destinationDirectory.FullName, subDirectory.Name);
+                        Copy(subDirectory.FullName, destinationSubDirectory);
+                    }
+                    catch (Exception)
+                    {
+                        Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
+                        Reports.Add(log);
+                    }
+
+                stop = false;
             }
         }
 
@@ -188,11 +183,19 @@ namespace Demon.Functions.Backups
         //DeleteOld - virtual => každá třída si z toho bude ukládat snapshot pro retenci (kromě inceremntal??)
         public virtual void DeleteOld(Configs config, Snapshot snapshot, Destinations destination)
         {
-            int packageVersionToDelete = snapshot.PackageVersion % config.MaxPackageAmount + (snapshot.PackageVersion - config.MaxPackageAmount);
+            int packageVersionToDelete = snapshot.PackageVersion - config.MaxPackageAmount;
             for (int i = 1; i <= config.MaxPackageSize; i++)
             {
                 DirectoryInfo destinationDirectory = new DirectoryInfo($"{destination.DestinationPath}\\{packageVersionToDelete}_{config.Algorithm}_{i}");
-                destinationDirectory.Delete();
+                try
+                {
+                    destinationDirectory.Delete(true);
+                }
+                catch (Exception ex)
+                {
+                    Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't delete old directory(retention): {destinationDirectory.FullName} on computer with ID: {Core.ComputerID}, with error mesage:{ex}" };
+                    Reports.Add(log);
+                }
             }
         }
 
@@ -205,25 +208,31 @@ namespace Demon.Functions.Backups
             //Nastavíme updatedSnapu verzi balíčku, pokud přesahuje maximální množství balíčků tak se odstraní nejstarší balíček
             if (updatedSnap.PackageVersion > config.MaxPackageAmount)
             {
-
-                foreach (Destinations destination in destinations)
-                {
-                    DeleteOld(config, updatedSnap, destination);
-                }
+                if (updatedSnap.PackagePartVersion == 1)
+                    foreach (Destinations destination in destinations)
+                    {
+                        DeleteOld(config, updatedSnap, destination);
+                    }
 
                 if (updatedSnap.PackagePartVersion >= config.MaxPackageSize)
                 {
-                    updatedSnap.PackagePartVersion = 1;
                     updatedSnap.PackageVersion++;
+                    updatedSnap.PackagePartVersion = 1;
                 }
                 else
                     updatedSnap.PackagePartVersion++;
 
             }
+            else if (updatedSnap.PackagePartVersion >= config.MaxPackageSize)
+            {
+                updatedSnap.PackagePartVersion = 1;
+                updatedSnap.PackageVersion++;
+            }
             else
             {
                 updatedSnap.PackagePartVersion++;
             }
+
 
             //Pokud cesta není prázdná a algoritmus není Full tak updatne cesty
             if (UpdatedPaths.Count != 0 && Algorithm != "Full")

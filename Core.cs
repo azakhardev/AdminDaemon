@@ -24,7 +24,7 @@ namespace Demon
         //Seznam configů pro daný počítač (ID počítače)
         public List<Configs> Configs { get; set; }
 
-        public List<Log> Reports { get; set; } = new List<Log>();
+        public List<Log> Logs { get; set; } = new List<Log>();
 
         public List<Backuper> Backupers { get; set; } = new List<Backuper>();
 
@@ -76,7 +76,7 @@ namespace Demon
                 //Přidá všechny reporty z backuperů do Core
                 foreach (Log report in backuper.Reports)
                 {
-                    this.Reports.Add(report);
+                    this.Logs.Add(report);
                 }
             }
 
@@ -170,9 +170,9 @@ namespace Demon
         //Postuje všechny reporty z Core na server
         public async Task PostReports()
         {
-            foreach (Log report in Reports)
+            foreach (Log log in Logs)
             {
-                Client.PostAsJsonAsync($"/api/Logs", report);
+                await Client.PostAsJsonAsync($"/api/Logs", log);
             }
         }
 
