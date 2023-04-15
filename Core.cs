@@ -65,13 +65,21 @@ namespace Demon
             {
                 foreach (var config in this.Configs)
                 {
+                    int noErrors = 0;
                     foreach (var backuperConfig in backuper.Configs)
                     {
                         if (config.ID == backuperConfig.ID)
                             if (CheckSchedule(config) == true)
                                 backuper.ExecBackup(ReturnSourcesToCopy(config), config.Destinations, config);
                     }
+
+                    if (backuper.Reports.Count == noErrors)
+                    {
+                        Log log = new Log(config.ID) { Date = DateTime.Now, Errors = false, Message = $"Backup on computer:{ComputerID} for config:{config.ID} completed succesfully" };
+                    }
                 }
+
+                
 
                 //Přidá všechny reporty z backuperů do Core
                 foreach (Log report in backuper.Reports)
@@ -172,10 +180,13 @@ namespace Demon
         {
             foreach (Log log in Logs)
             {
-                await Client.PostAsJsonAsync($"/api/Logs", log);
+                LogToPost report = new LogToPost() {Date = log.Date, Errors = log.Errors, Message = log.Message };
+                var pcCfId = await Client.GetStringAsync($"api/Logs/{this.ComputerID}/{log.ConfigId}");
+
+                report.ComputersCofnigsId = JsonConvert.DeserializeObject<int>(pcCfId);
+                
+                await Client.PostAsJsonAsync($"/api/Logs", report);
             }
         }
-
-
     }
 }

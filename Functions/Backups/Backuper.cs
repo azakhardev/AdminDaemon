@@ -52,8 +52,9 @@ namespace Demon.Functions.Backups
                 }
             }
 
-            //Obnoví v Core snapshot pro daný config
-            await UpdateSnapshot(config, destinations);
+            //Obnoví v Core snapshot pro daný config pokud nedošlo k chybám
+            if (!Reports.Any())
+                await UpdateSnapshot(config, destinations);
         }
 
         //Metoda pro kopírování dat - zkopíruje soubor nebo prázdný soubor který získá z listu sources
@@ -104,7 +105,7 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception)
                 {
-                    Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destinationDirectory} on computer with ID: {Core.ComputerID}" };
+                    Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destinationDirectory} on computer with ID: {Core.ComputerID}" };
                     Reports.Add(log);
                 }
             }
@@ -125,7 +126,7 @@ namespace Demon.Functions.Backups
                     }
                     catch (Exception)
                     {
-                        Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
+                        Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
                         Reports.Add(log);
                     }
 
@@ -148,7 +149,7 @@ namespace Demon.Functions.Backups
                     }
                     catch (Exception)
                     {
-                        Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
+                        Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
                         Reports.Add(log);
                     }
 
@@ -169,6 +170,11 @@ namespace Demon.Functions.Backups
             foreach (FileInfo file in sourceDirectory.GetFiles())
             {
                 string destinationFile = System.IO.Path.Combine(destinationDirectory.FullName, file.Name);
+
+                if (File.Exists(destinationFile))
+                {
+                    File.SetAttributes(destinationFile, FileAttributes.Normal);
+                }
                 file.CopyTo(destinationFile, true);
             }
 
@@ -193,7 +199,7 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception ex)
                 {
-                    Log log = new Log(Core.ComputerID, snapshot.ConfigID, Core.Client) { Date = DateTime.Now, Errors = true, Message = $"Couldn't delete old directory(retention): {destinationDirectory.FullName} on computer with ID: {Core.ComputerID}, with error mesage:{ex}" };
+                    Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't delete old directory(retention): {destinationDirectory.FullName} on computer with ID: {Core.ComputerID}, with error mesage:{ex}" };
                     Reports.Add(log);
                 }
             }

@@ -11,24 +11,17 @@ namespace Demon.Models
     {
         public int ID { get; set; }
 
-        public int ComputersConfigsID { get; set; }
+        public int ConfigId { get; set; }
 
         public DateTime Date { get; set; }
 
         public bool Errors { get; set; }
 
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
-        public Log(int computerId, int configId, HttpClient client)
+        public Log( int cofnigId)
         {
-            var ResultId = GetCpsCfgsId(computerId, configId, client);
-            ComputersConfigsID = Convert.ToInt32(ResultId);
-        }
-
-        public async Task<int> GetCpsCfgsId(int computerId, int configId, HttpClient client) 
-        {
-            var computersConfigsResult = await client.GetStringAsync($"api/Logs/{computerId}/{configId}");
-            return Convert.ToInt32(computersConfigsResult);
-        }
+            ConfigId = cofnigId;
+        }        
     }
 }
