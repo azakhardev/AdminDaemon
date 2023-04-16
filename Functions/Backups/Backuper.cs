@@ -171,12 +171,7 @@ namespace Demon.Functions.Backups
             {
                 string destinationFile = System.IO.Path.Combine(destinationDirectory.FullName, file.Name);
 
-                file.CopyTo(destinationFile, true);
-
-                if (File.Exists(destinationFile))
-                {
-                    File.SetAttributes(destinationFile, FileAttributes.Normal);
-                }
+                File.Copy(file.FullName, destinationFile);
             }
 
             foreach (DirectoryInfo subDirectory in sourceDirectory.GetDirectories())
