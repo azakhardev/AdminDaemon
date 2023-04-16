@@ -10,7 +10,7 @@ namespace Demon.Functions.Objects
     {
         public int ID { get; set; }
 
-        public int ComputersCofnigsId { get; set; }
+        public int ComputersConfigsId { get; set; }
 
         public DateTime Date { get; set; }
 

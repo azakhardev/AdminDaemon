@@ -62,7 +62,7 @@ namespace Demon.Functions.Backups
         public virtual void CopyMain(string sourcePath, string destination, Snapshot snapshot)
         {
             DirectoryInfo sourceDirectory = new DirectoryInfo(sourcePath);
-            DirectoryInfo destinationDirectory = new DirectoryInfo(($"{destination}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}"));
+            DirectoryInfo destinationDirectory = new DirectoryInfo(($"{destination}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}_Pc{Core.ComputerID}_Cf{snapshot.ConfigID}"));
 
             List<string> matchingPaths = new List<string>();
             foreach (var path in snapshot.Paths)
@@ -171,11 +171,12 @@ namespace Demon.Functions.Backups
             {
                 string destinationFile = System.IO.Path.Combine(destinationDirectory.FullName, file.Name);
 
+                file.CopyTo(destinationFile, true);
+
                 if (File.Exists(destinationFile))
                 {
                     File.SetAttributes(destinationFile, FileAttributes.Normal);
                 }
-                file.CopyTo(destinationFile, true);
             }
 
             foreach (DirectoryInfo subDirectory in sourceDirectory.GetDirectories())
@@ -192,14 +193,14 @@ namespace Demon.Functions.Backups
             int packageVersionToDelete = snapshot.PackageVersion - config.MaxPackageAmount;
             for (int i = 1; i <= config.MaxPackageSize; i++)
             {
-                DirectoryInfo destinationDirectory = new DirectoryInfo($"{destination.DestinationPath}\\{packageVersionToDelete}_{config.Algorithm}_{i}");
+                DirectoryInfo destinationDirectory = new DirectoryInfo($"{destination.DestinationPath}\\{packageVersionToDelete}_{config.Algorithm}_{i}_Pc{Core.ComputerID}_Cf{config.ID}");
                 try
                 {
                     destinationDirectory.Delete(true);
                 }
                 catch (Exception ex)
                 {
-                    Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't delete old directory(retention): {destinationDirectory.FullName} on computer with ID: {Core.ComputerID}, with error mesage:{ex}" };
+                    Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't delete old directory(retention): {destinationDirectory.FullName} on computer with ID: {Core.ComputerID}, with error mesage: {ex}" };
                     Reports.Add(log);
                 }
             }
@@ -224,15 +225,25 @@ namespace Demon.Functions.Backups
                 {
                     updatedSnap.PackageVersion++;
                     updatedSnap.PackagePartVersion = 1;
+
+                    //Odstraníme cesty ze snapshotu(kvůli retenci)
+                    UpdatedPaths.Clear();
+                    updatedSnap.Paths.Clear();
                 }
                 else
+                {
                     updatedSnap.PackagePartVersion++;
-
+                }
             }
             else if (updatedSnap.PackagePartVersion >= config.MaxPackageSize)
             {
                 updatedSnap.PackagePartVersion = 1;
+
                 updatedSnap.PackageVersion++;
+
+                //Odstraníme cesty ze snapshotu(kvůli retenci)
+                UpdatedPaths.Clear();
+                updatedSnap.Paths.Clear();
             }
             else
             {

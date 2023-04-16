@@ -32,7 +32,6 @@ namespace Demon.Functions.Backups
                 foreach (var dirs in directoryInfo.GetDirectories())
                 {
                     UpdatePaths(directoryInfo);
-
                 }
             }
         }

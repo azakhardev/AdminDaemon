@@ -73,13 +73,12 @@ namespace Demon
                                 backuper.ExecBackup(ReturnSourcesToCopy(config), config.Destinations, config);
                     }
 
-                    if (backuper.Reports.Count == noErrors)
+                    if (backuper.Reports.Count == noErrors && config.Algorithm == backuper.Algorithm)
                     {
-                        Log log = new Log(config.ID) { Date = DateTime.Now, Errors = false, Message = $"Backup on computer:{ComputerID} for config:{config.ID} completed succesfully" };
+                        Log log = new Log(config.ID) { Date = DateTime.Now, Errors = false, Message = $"Backup on computer: {ComputerID} for config: {config.ID} completed succesfully" };
+                        Logs.Add(log);
                     }
-                }
-
-                
+                }                
 
                 //Přidá všechny reporty z backuperů do Core
                 foreach (Log report in backuper.Reports)
@@ -183,8 +182,8 @@ namespace Demon
                 LogToPost report = new LogToPost() {Date = log.Date, Errors = log.Errors, Message = log.Message };
                 var pcCfId = await Client.GetStringAsync($"api/Logs/{this.ComputerID}/{log.ConfigId}");
 
-                report.ComputersCofnigsId = JsonConvert.DeserializeObject<int>(pcCfId);
-                
+                report.ComputersConfigsId = JsonConvert.DeserializeObject<int>(pcCfId);
+                                
                 await Client.PostAsJsonAsync($"/api/Logs", report);
             }
         }
