@@ -19,17 +19,26 @@ namespace Demon
             await authorizePc.Authorize(client);
             core.ComputerID = authorizePc.ReturnId();
 
+
             while (true)
             {
 
-                await core.GetDataFromAPI();
+                if (await core.CheckStatus())
+                {
+                    await core.GetDataFromAPI();
 
-                core.Saver();
+                    core.Saver();
 
-                await core.PostReports();
-                core.Logs.Clear();
-                
+                    await core.PostReports();
+                    core.Logs.Clear();
+                }
+                else 
+                {
+                    Console.WriteLine("This computer is blocked");
+                }
+
                 Thread.Sleep(1000 * 600);
+
             }
         }
     }

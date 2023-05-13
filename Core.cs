@@ -2,12 +2,7 @@
 using Demon.Functions.Objects;
 using Demon.Models;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Json;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Demon
 {
@@ -15,24 +10,17 @@ namespace Demon
     {
         public int ComputerID { get; set; }
 
-        //Ukládá data - rozvrh, cesty odkud a kam pro jednotlivý config - nejspíš zbytečné
-        //public Schedules Schedules { get; set; }
         public HttpClient Client { get; set; }
-        ////Ukldádá snapshoty k jednotlivým configům pro tento počítač
+
         public List<Snapshot> Snapshots { get; set; } = new List<Snapshot>();
 
-        //Seznam configů pro daný počítač (ID počítače)
         public List<Configs> Configs { get; set; }
 
         public List<Log> Logs { get; set; } = new List<Log>();
 
         public List<Backuper> Backupers { get; set; } = new List<Backuper>();
 
-        public int FullRetention { get; set; } = 0;
-
-        public int IncRetention { get; set; } = 0;
-
-        public int DifRetention { get; set; } = 0;
+        public DateTime LastBackup { get; set; }
 
         public Core(HttpClient client)
         {
@@ -51,11 +39,14 @@ namespace Demon
             await SetSnapshots();
             await GetSources();
             await GetDestinations();
+
         }
 
         //Nejdřív by si měl zjistit jestli je povolen/má přístup do sítě - pokud ne tak načte data z texťáku uloženého na PC
-        public void Saver()
+        public async void Saver()
         {
+            await Client.PutAsJsonAsync($"api/Computers/{this.ComputerID}", new Computer {BackupStatus = "Backup in progress" });
+
             Backupers.Add(new FullBackup(this, "Full"));
             Backupers.Add(new DifferentialBackup(this, "Differential"));
             Backupers.Add(new IncrementalBackup(this, "Incremental"));
@@ -88,6 +79,8 @@ namespace Demon
             }
 
             Backupers.Clear();
+
+            await Client.PutAsJsonAsync($"api/Computers/{this.ComputerID}", new Computer { LastBackup = DateTime.Now, BackupStatus = "Backup ended" });
         }
 
         //Metoda která zjistí jestli se má zálohovat config který se jí předá jako argument - pro cron
@@ -185,7 +178,20 @@ namespace Demon
                 report.ComputersConfigsId = JsonConvert.DeserializeObject<int>(pcCfId);
                                 
                 await Client.PostAsJsonAsync($"/api/Logs", report);
-            }
+            }           
+        }
+
+        public async Task<bool> CheckStatus() 
+        {
+            var request = await Client.GetStringAsync($"api/Computers/{this.ComputerID}");
+            Computer computer = JsonConvert.DeserializeObject<Computer>(request);
+
+            this.LastBackup = computer.LastBackup;
+
+            if (computer.ComputerStatus.ToLower() == "blocked")
+                return false;            
+
+            return true;
         }
     }
 }
