@@ -105,7 +105,7 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception)
                 {
-                    Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destinationDirectory} on computer with ID: {Core.ComputerID}" };
+                    Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = true, Message = $"Couldn't create directory: {destinationDirectory} on computer with ID: {Core.ComputerID}" };
                     Reports.Add(log);
                 }
             }
@@ -126,7 +126,7 @@ namespace Demon.Functions.Backups
                     }
                     catch (Exception)
                     {
-                        Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
+                        Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = true, Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
                         Reports.Add(log);
                     }
 
@@ -149,7 +149,7 @@ namespace Demon.Functions.Backups
                     }
                     catch (Exception)
                     {
-                        Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
+                        Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = true, Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
                         Reports.Add(log);
                     }
 
@@ -195,7 +195,7 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception ex)
                 {
-                    Log log = new Log(snapshot.ConfigID) { Date = DateTime.Now, Errors = true, Message = $"Couldn't delete old directory(retention): {destinationDirectory.FullName} on computer with ID: {Core.ComputerID}, with error mesage: {ex}" };
+                    Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = true, Message = $"Couldn't delete old directory(retention): {destinationDirectory.FullName} on computer with ID: {Core.ComputerID}, with error mesage: {ex}" };
                     Reports.Add(log);
                 }
             }

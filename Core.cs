@@ -3,6 +3,7 @@ using Demon.Functions.Objects;
 using Demon.Models;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
+using System.Reflection;
 
 namespace Demon
 {
@@ -66,7 +67,7 @@ namespace Demon
 
                     if (backuper.Reports.Count == noErrors && config.Algorithm == backuper.Algorithm)
                     {
-                        Log log = new Log(config.ID) { Date = DateTime.Now, Errors = false, Message = $"Backup on computer: {ComputerID} for config: {config.ID} completed succesfully" };
+                        Log log = new Log(config.ID) {ComputerId = this.ComputerID, ConfigId = config.ID, Date = DateTime.Now, Errors = false, Message = $"Backup on computer: {ComputerID} for config: {config.ID} completed succesfully" };
                         Logs.Add(log);
                     }
                 }                
@@ -172,12 +173,12 @@ namespace Demon
         {
             foreach (Log log in Logs)
             {
-                LogToPost report = new LogToPost() {Date = log.Date, Errors = log.Errors, Message = log.Message };
+                //LogToPost report = new LogToPost() {Date = log.Date, Errors = log.Errors, Message = log.Message };
                 var pcCfId = await Client.GetStringAsync($"api/Logs/{this.ComputerID}/{log.ConfigId}");
 
-                report.ComputersConfigsId = JsonConvert.DeserializeObject<int>(pcCfId);
+                log.ComputersConfigsId = JsonConvert.DeserializeObject<int>(pcCfId);
                                 
-                await Client.PostAsJsonAsync($"/api/Logs", report);
+                await Client.PostAsJsonAsync($"/api/Logs", log);
             }           
         }
 

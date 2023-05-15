@@ -15,3 +15,20 @@ C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\De
 C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.pdb
 C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\Demon.genruntimeconfig.cache
 C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\obj\Debug\net6.0\ref\Demon.dll
+C:\Users\Ondra\Desktop\Demon\bin\Debug\net6.0\Demon.exe
+C:\Users\Ondra\Desktop\Demon\bin\Debug\net6.0\Demon.deps.json
+C:\Users\Ondra\Desktop\Demon\bin\Debug\net6.0\Demon.runtimeconfig.json
+C:\Users\Ondra\Desktop\Demon\bin\Debug\net6.0\Demon.dll
+C:\Users\Ondra\Desktop\Demon\bin\Debug\net6.0\Demon.pdb
+C:\Users\Ondra\Desktop\Demon\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.csproj.AssemblyReference.cache
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.AssemblyInfoInputs.cache
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.AssemblyInfo.cs
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.csproj.CoreCompileInputs.cache
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.csproj.CopyComplete
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.dll
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\refint\Demon.dll
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.pdb
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.genruntimeconfig.cache
+C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\ref\Demon.dll

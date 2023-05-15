@@ -11,6 +11,10 @@ namespace Demon.Models
     {
         public int ID { get; set; }
 
+        public int ComputersConfigsId { get; set; }
+
+        public int ComputerId { get; set; }
+
         public int ConfigId { get; set; }
 
         public DateTime Date { get; set; }
@@ -19,9 +23,9 @@ namespace Demon.Models
 
         public string? Message { get; set; }
 
-        public Log( int cofnigId)
+        public Log(int cofnigId)
         {
             ConfigId = cofnigId;
-        }        
+        }
     }
 }

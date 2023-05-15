@@ -16,7 +16,5 @@ namespace Demon.Models
         public string BackupStatus { get; set; }
 
         public virtual List<string> MacAddresses { get; set; }
-        public virtual List<int> ComputersConfigs { get; set; }
-        public virtual List<int> ComputersGroups { get; set; }
     }
 }

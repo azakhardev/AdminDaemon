@@ -32,7 +32,7 @@ namespace Demon
                     await core.PostReports();
                     core.Logs.Clear();
                 }
-                else 
+                else
                 {
                     Console.WriteLine("This computer is blocked");
                 }
