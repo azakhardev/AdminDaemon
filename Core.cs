@@ -67,7 +67,7 @@ namespace Demon
 
                     if (backuper.Reports.Count == noErrors && config.Algorithm == backuper.Algorithm)
                     {
-                        Log log = new Log(config.ID) {ComputerId = this.ComputerID, ConfigId = config.ID, Date = DateTime.Now, Errors = false, Message = $"Backup on computer: {ComputerID} for config: {config.ID} completed succesfully" };
+                        Log log = new Log(config.ID) {ComputerId = this.ComputerID, ConfigId = config.ID, Date = DateTime.Now, Errors = "No", Message = $"Backup on computer: {ComputerID} for config: {config.ID} completed succesfully" };
                         Logs.Add(log);
                     }
                 }                

@@ -19,7 +19,7 @@ namespace Demon.Models
 
         public DateTime Date { get; set; }
 
-        public bool Errors { get; set; }
+        public string Errors { get; set; }
 
         public string? Message { get; set; }
 

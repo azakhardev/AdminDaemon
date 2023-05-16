@@ -29,6 +29,7 @@ namespace Demon
 
                     core.Saver();
 
+                    Thread.Sleep(1000 * 6);
                     await core.PostReports();
                     core.Logs.Clear();
                 }
