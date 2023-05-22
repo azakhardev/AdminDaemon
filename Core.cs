@@ -1,6 +1,7 @@
 ﻿using Demon.Functions.Backups;
 using Demon.Functions.Objects;
 using Demon.Models;
+using NCrontab;
 using Newtonsoft.Json;
 using System.Net.Http.Json;
 using System.Reflection;
@@ -87,8 +88,11 @@ namespace Demon
         //Metoda která zjistí jestli se má zálohovat config který se jí předá jako argument - pro cron
         public bool CheckSchedule(Configs config)
         {
-            //    if (config.Schedule == "")
-            //        return true;
+            CrontabSchedule schedule = CrontabSchedule.Parse(config.Schedule);
+            
+
+            if (schedule.GetNextOccurrence(this.LastBackup) >= DateTime.Now)
+                    return true;
             return true;
         }
 

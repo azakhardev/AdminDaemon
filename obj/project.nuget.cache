@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "n9OfDXvbxyEt42cZ0ELYqIZ3M2aHh7z4PZJ6W+lXmq1hU6K+jGbew6nnNzzG7AYmyjOUMosrJ269KbJzd4Q58A==",
+  "dgSpecHash": "IL9iKZOmSG1miRjvyWawCFtFc+rc4gZbSdg/mFSKTh2VE7sRorfWRS1hyip6OqFlct84tckvhF/WIX1vuNBeqA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Ondra\\Desktop\\Demon\\Demon.csproj",
+  "projectFilePath": "C:\\Users\\Артём\\Desktop\\SSSVT predmety\\PRG\\Backup Project\\Demon\\Demon\\Demon.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Ondra\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+    "C:\\Users\\Артём\\.nuget\\packages\\ncrontab.signed\\3.3.2\\ncrontab.signed.3.3.2.nupkg.sha512",
+    "C:\\Users\\Артём\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
   ],
   "logs": []
 }

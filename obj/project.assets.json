@@ -2,6 +2,19 @@
   "version": 3,
   "targets": {
     "net6.0": {
+      "NCrontab.Signed/3.3.2": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/NCrontab.Signed.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/NCrontab.Signed.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
       "Newtonsoft.Json/13.0.3": {
         "type": "package",
         "compile": {
@@ -18,6 +31,24 @@
     }
   },
   "libraries": {
+    "NCrontab.Signed/3.3.2": {
+      "sha512": "Ef9nJs/iIkM3hAcAEDD5dZy0cDFfmmPlhRAt/IPYcsWdMUHZ6MQLuqv5oA6TZrpvO6Sj8lq/B5njbJUMnxedLg==",
+      "type": "package",
+      "path": "ncrontab.signed/3.3.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "COPYING.txt",
+        "lib/net35/NCrontab.Signed.dll",
+        "lib/net35/NCrontab.Signed.pdb",
+        "lib/netstandard1.0/NCrontab.Signed.dll",
+        "lib/netstandard1.0/NCrontab.Signed.pdb",
+        "lib/netstandard2.0/NCrontab.Signed.dll",
+        "lib/netstandard2.0/NCrontab.Signed.pdb",
+        "ncrontab.signed.3.3.2.nupkg.sha512",
+        "ncrontab.signed.nuspec"
+      ]
+    },
     "Newtonsoft.Json/13.0.3": {
       "sha512": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
       "type": "package",
@@ -51,23 +82,29 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
+      "NCrontab.Signed >= 3.3.2",
       "Newtonsoft.Json >= 13.0.3"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Ondra\\.nuget\\packages\\": {}
+    "C:\\Users\\Артём\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Ondra\\Desktop\\Demon\\Demon.csproj",
+      "projectUniqueName": "C:\\Users\\Артём\\Desktop\\SSSVT predmety\\PRG\\Backup Project\\Demon\\Demon\\Demon.csproj",
       "projectName": "Demon",
-      "projectPath": "C:\\Users\\Ondra\\Desktop\\Demon\\Demon.csproj",
-      "packagesPath": "C:\\Users\\Ondra\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Ondra\\Desktop\\Demon\\obj\\",
+      "projectPath": "C:\\Users\\Артём\\Desktop\\SSSVT predmety\\PRG\\Backup Project\\Demon\\Demon\\Demon.csproj",
+      "packagesPath": "C:\\Users\\Артём\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Артём\\Desktop\\SSSVT predmety\\PRG\\Backup Project\\Demon\\Demon\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\Ondra\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Артём\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -75,6 +112,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -93,6 +131,10 @@
       "net6.0": {
         "targetAlias": "net6.0",
         "dependencies": {
+          "NCrontab.Signed": {
+            "target": "Package",
+            "version": "[3.3.2, )"
+          },
           "Newtonsoft.Json": {
             "target": "Package",
             "version": "[13.0.3, )"
@@ -114,7 +156,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.402\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.200\\RuntimeIdentifierGraph.json"
       }
     }
   }

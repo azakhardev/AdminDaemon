@@ -35,7 +35,7 @@ namespace Demon
             {
                 ComputerName = Environment.MachineName,
                 Description = "New computer",
-                ComputerStatus = "unauthorized",
+                ComputerStatus = "Unauthorized",
                 BackupStatus = "",
                 LastBackup = DateTime.Now
             };
