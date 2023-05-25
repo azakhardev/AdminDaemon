@@ -21,9 +21,9 @@ namespace Demon.Functions.Backups
         }
 
         //Za osnovu se bere base.Copy, akorát porovná jestli existuje daný záznam v snapshotu 
-        public override void CopyMain(string source, string destination, Snapshot snapshot)
+        public override void CopyMain(string source, string destination, Snapshot snapshot, bool compression)
         {
-            base.CopyMain(source, destination, snapshot);
+            base.CopyMain(source, destination, snapshot, compression);
 
             //Ověřuje jestli snapshot obsahuje nějaké cesty, pokude ne tak přidá cestu ve formátu Json (jako string) do UpdatedPaths
             if (!snapshot.Paths.Any())

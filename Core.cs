@@ -12,6 +12,8 @@ namespace Demon
     {
         public int ComputerID { get; set; }
 
+        public string ComputerName { get; set; }
+
         public HttpClient Client { get; set; }
 
         public List<Snapshot> Snapshots { get; set; } = new List<Snapshot>();
@@ -45,7 +47,7 @@ namespace Demon
         }
 
         //Nejdřív by si měl zjistit jestli je povolen/má přístup do sítě - pokud ne tak načte data z texťáku uloženého na PC
-        public async void Saver()
+        public async Task Saver()
         {
             await Client.PutAsJsonAsync($"api/Computers/{this.ComputerID}", new Computer {BackupStatus = "Backup in progress" });
 
@@ -68,7 +70,7 @@ namespace Demon
 
                     if (backuper.Reports.Count == noErrors && config.Algorithm == backuper.Algorithm)
                     {
-                        Log log = new Log(config.ID) {ComputerId = this.ComputerID, ConfigId = config.ID, Date = DateTime.Now, Errors = "No", Message = $"Backup on computer: {ComputerID} for config: {config.ID} completed succesfully" };
+                        Log log = new Log(config.ID) {ComputerId = this.ComputerID, ConfigId = config.ID, Date = DateTime.Now, Errors = "No", Message = $"Backup on computer {this.ComputerName} for config: {config.ConfigName} completed succesfully." };
                         Logs.Add(log);
                     }
                 }                
@@ -90,9 +92,9 @@ namespace Demon
         {
             CrontabSchedule schedule = CrontabSchedule.Parse(config.Schedule);
             
-
-            if (schedule.GetNextOccurrence(this.LastBackup) >= DateTime.Now)
+            if (schedule.GetNextOccurrence(this.LastBackup) <= DateTime.Now)
                     return true;
+
             return true;
         }
 
@@ -192,6 +194,7 @@ namespace Demon
             Computer computer = JsonConvert.DeserializeObject<Computer>(request);
 
             this.LastBackup = computer.LastBackup;
+            this.ComputerName = computer.ComputerName;
 
             if (computer.ComputerStatus.ToLower() == "blocked")
                 return false;            

@@ -27,9 +27,8 @@ namespace Demon
                 {
                     await core.GetDataFromAPI();
 
-                    core.Saver();
+                    await core.Saver();
 
-                    Thread.Sleep(1000 * 6);
                     await core.PostReports();
                     core.Logs.Clear();
                 }
@@ -38,7 +37,7 @@ namespace Demon
                     Console.WriteLine("This computer is blocked");
                 }
 
-                Thread.Sleep(1000 * 600);
+                Thread.Sleep(1000 * 60);
 
             }
         }

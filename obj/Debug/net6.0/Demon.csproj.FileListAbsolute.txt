@@ -32,3 +32,4 @@ C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\refint\Demon.dll
 C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.pdb
 C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\Demon.genruntimeconfig.cache
 C:\Users\Ondra\Desktop\Demon\obj\Debug\net6.0\ref\Demon.dll
+C:\Users\Артём\Desktop\SSSVT predmety\PRG\Backup Project\Demon\Demon\bin\Debug\net6.0\NCrontab.Signed.dll

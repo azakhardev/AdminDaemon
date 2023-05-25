@@ -4,7 +4,9 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.IO.Compression;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,6 +27,8 @@ namespace Demon.Functions.Backups
         public List<Configs> Configs { get; set; } = new List<Configs>();
 
         public List<Log> Reports { get; set; } = new List<Log>();
+
+        public DirectoryInfo DestinaionDirectory { get; set; }
 
         public Backuper(Core core, string algorithm)
         {
@@ -48,7 +52,7 @@ namespace Demon.Functions.Backups
             {
                 foreach (Destinations destination in destinations)
                 {
-                    CopyMain(source.SourcePath, destination.DestinationPath, Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault());
+                    CopyMain(source.SourcePath, destination.DestinationPath, Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault(), config.Zip);
                 }
             }
 
@@ -59,7 +63,7 @@ namespace Demon.Functions.Backups
 
         //Metoda pro kopírování dat - zkopíruje soubor nebo prázdný soubor který získá z listu sources
         //Odfiltrováno pomocí metody ReturnSourcesToCopy která vrací list cest které nejsou ve snapshotu
-        public virtual void CopyMain(string sourcePath, string destination, Snapshot snapshot)
+        public virtual void CopyMain(string sourcePath, string destination, Snapshot snapshot, bool compression)
         {
             DirectoryInfo sourceDirectory = new DirectoryInfo(sourcePath);
             DirectoryInfo destinationDirectory = new DirectoryInfo(($"{destination}\\{snapshot.PackageVersion}_{this.Algorithm}_{snapshot.PackagePartVersion}_Pc{Core.ComputerID}_Cf{snapshot.ConfigID}"));
@@ -73,6 +77,9 @@ namespace Demon.Functions.Backups
                 }
             }
             TryToCopy(sourceDirectory, destinationDirectory, snapshot, matchingPaths);
+
+            if (compression)
+                Zip(destinationDirectory.FullName);        
         }
 
         public List<string> TraverseDirectories(string currentDir, string snapshotPath)
@@ -105,13 +112,25 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception)
                 {
-                    Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't create directory: {destinationDirectory} on computer with ID: {Core.ComputerID}" };
+                    Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't create directory: {destinationDirectory} on computer {Core.ComputerName}" };
                     Reports.Add(log);
                 }
             }
 
+            if (sourceDirectory.Exists == false)
+            {
+                Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't find source directory: {sourceDirectory} on computer {Core.ComputerName}" };
+                Reports.Add(log);
+            }
+
             foreach (FileInfo file in sourceDirectory.GetFiles())
             {
+                if (file.Exists == false) 
+                {
+                    Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't find file: {file} on computer {Core.ComputerName}" };
+                    Reports.Add(log);
+                }
+
                 foreach (var item in matchingPaths)
                 {
                     if (item == file.FullName)
@@ -126,7 +145,7 @@ namespace Demon.Functions.Backups
                     }
                     catch (Exception)
                     {
-                        Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't copy file: {file} on computer with ID: {Core.ComputerID}" };
+                        Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't copy file: {file} on computer {Core.ComputerName}" };
                         Reports.Add(log);
                     }
 
@@ -135,6 +154,12 @@ namespace Demon.Functions.Backups
 
             foreach (DirectoryInfo subDirectory in sourceDirectory.GetDirectories())
             {
+                if (subDirectory.Exists == false)
+                {
+                    Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't find subdirectory: {subDirectory} on computer {Core.ComputerName}" };
+                    Reports.Add(log);
+                }
+
                 foreach (var item in matchingPaths)
                 {
                     if (item == subDirectory.FullName)
@@ -149,7 +174,7 @@ namespace Demon.Functions.Backups
                     }
                     catch (Exception)
                     {
-                        Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't copy directory: {subDirectory.FullName} on computer with ID: {Core.ComputerID}" };
+                        Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't copy directory: {subDirectory.FullName} on computer {Core.ComputerName}" };
                         Reports.Add(log);
                     }
 
@@ -195,8 +220,15 @@ namespace Demon.Functions.Backups
                 }
                 catch (Exception ex)
                 {
-                    Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't delete old directory(retention): {destinationDirectory.FullName} on computer with ID: {Core.ComputerID}, with error mesage: {ex}" };
-                    Reports.Add(log);
+                    try
+                    {
+                        File.Delete(destinationDirectory.FullName+".zip");
+                    }
+                    catch (Exception)
+                    {
+                        Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't delete old directory(retention): {destinationDirectory.FullName} on computer {Core.ComputerName}, with error mesage: {ex}" };
+                        Reports.Add(log);
+                    }
                 }
             }
         }
@@ -263,6 +295,16 @@ namespace Demon.Functions.Backups
 
             SnapshotPut snap = new SnapshotPut(snapshot, Core.ComputerID, snapshot.ConfigID);
             var result = await Client.PutAsJsonAsync("api/Computers/Snapshot", snap);
+        }
+
+        public void Zip(string oldDirectry) 
+        {
+            DirectoryInfo oldDir = new DirectoryInfo(oldDirectry);
+            string destinationZip = oldDirectry + ".zip";
+
+            ZipFile.CreateFromDirectory(oldDirectry, destinationZip);
+            oldDir.Delete(true);
+
         }
     }
 }

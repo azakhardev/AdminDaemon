@@ -8,10 +8,19 @@
     ".NETCoreApp,Version=v6.0": {
       "Demon/1.0.0": {
         "dependencies": {
+          "NCrontab.Signed": "3.3.2",
           "Newtonsoft.Json": "13.0.3"
         },
         "runtime": {
           "Demon.dll": {}
+        }
+      },
+      "NCrontab.Signed/3.3.2": {
+        "runtime": {
+          "lib/netstandard2.0/NCrontab.Signed.dll": {
+            "assemblyVersion": "3.3.2.0",
+            "fileVersion": "3.3.2.0"
+          }
         }
       },
       "Newtonsoft.Json/13.0.3": {
@@ -29,6 +38,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "NCrontab.Signed/3.3.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Ef9nJs/iIkM3hAcAEDD5dZy0cDFfmmPlhRAt/IPYcsWdMUHZ6MQLuqv5oA6TZrpvO6Sj8lq/B5njbJUMnxedLg==",
+      "path": "ncrontab.signed/3.3.2",
+      "hashPath": "ncrontab.signed.3.3.2.nupkg.sha512"
     },
     "Newtonsoft.Json/13.0.3": {
       "type": "package",
