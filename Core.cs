@@ -95,7 +95,7 @@ namespace Demon
             if (schedule.GetNextOccurrence(this.LastBackup) <= DateTime.Now)
                     return true;
 
-            return true;
+            return false;
         }
 
         //Metoda která vrací list cest pro zadaný config ke složkám které by se měly nakopírovat
