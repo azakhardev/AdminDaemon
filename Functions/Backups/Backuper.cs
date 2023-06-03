@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -52,7 +53,15 @@ namespace Demon.Functions.Backups
             {
                 foreach (Destinations destination in destinations)
                 {
-                    CopyMain(source.SourcePath, destination.DestinationPath, Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault(), config.Zip);
+                    if (destination.DestinationPath.Substring(0, 6) == "ftp://")
+                    {
+                        FtpWebRequest ftpRequest = (FtpWebRequest)WebRequest.Create(destination.DestinationPath);
+                        ftpRequest.Credentials = new NetworkCredential("Demon", "De123Mon456");
+                        
+                        CopyMain(source.SourcePath, destination.DestinationPath, Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault(), config.Zip);
+                    }
+                    else
+                        CopyMain(source.SourcePath, destination.DestinationPath, Core.Snapshots.Where(x => x.ConfigID == config.ID).FirstOrDefault(), config.Zip);
                 }
             }
 
@@ -79,7 +88,7 @@ namespace Demon.Functions.Backups
             TryToCopy(sourceDirectory, destinationDirectory, snapshot, matchingPaths);
 
             if (compression)
-                Zip(destinationDirectory.FullName);        
+                Zip(destinationDirectory.FullName);
         }
 
         public List<string> TraverseDirectories(string currentDir, string snapshotPath)
@@ -125,7 +134,7 @@ namespace Demon.Functions.Backups
 
             foreach (FileInfo file in sourceDirectory.GetFiles())
             {
-                if (file.Exists == false) 
+                if (file.Exists == false)
                 {
                     Log log = new Log(snapshot.ConfigID) { ComputerId = Core.ComputerID, Date = DateTime.Now, Errors = "Yes", Message = $"Couldn't find file: {file} on computer {Core.ComputerName}" };
                     Reports.Add(log);
@@ -222,7 +231,7 @@ namespace Demon.Functions.Backups
                 {
                     try
                     {
-                        File.Delete(destinationDirectory.FullName+".zip");
+                        File.Delete(destinationDirectory.FullName + ".zip");
                     }
                     catch (Exception)
                     {
@@ -297,7 +306,7 @@ namespace Demon.Functions.Backups
             var result = await Client.PutAsJsonAsync("api/Computers/Snapshot", snap);
         }
 
-        public void Zip(string oldDirectry) 
+        public void Zip(string oldDirectry)
         {
             DirectoryInfo oldDir = new DirectoryInfo(oldDirectry);
             string destinationZip = oldDirectry + ".zip";
